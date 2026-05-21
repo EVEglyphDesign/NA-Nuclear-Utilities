@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NA Nuclear Utilities — SAP Landscape</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --bg:#0b1320; --panel:#111a2e; --border:#1f2a44; --text:#e6edf7; --muted:#8aa0c2;
+    --accent:#7cc4ff; --grow:#22c55e; --rise:#3b82f6; --s4onprem:#a78bfa; --ecc:#f59e0b;
+    --live:#10b981; --signed:#3b82f6; --transition:#f59e0b; --no:#ef4444; --unknown:#64748b;
+  }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,Segoe UI,Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); margin:0; padding:24px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:18px; }
+  .controls { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .controls input, .controls select {
+    background:var(--panel); border:1px solid var(--border); color:var(--text);
+    padding:8px 10px; border-radius:6px; font-size:13px;
+  }
+  .controls input { flex:1; min-width:240px; }
+  .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:18px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+  .card .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .card .row { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; }
+  table { width:100%; border-collapse:separate; border-spacing:0; background:var(--panel); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  th { background:#0e1729; color:var(--muted); text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 12px; border-bottom:1px solid var(--border); cursor:pointer; user-select:none; }
+  th:hover { color:var(--text); }
+  td { padding:12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  td.op { font-weight:600; min-width:180px; }
+  td .parent, td .src, td .li, td .small { color:var(--muted); font-size:11px; margin-top:2px; }
+  td.reactors { max-width:260px; color:#c5d3eb; font-size:12px; }
+  .muted { color:var(--muted); }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .badge { display:inline-block; padding:3px 8px; border-radius:11px; font-size:11px; font-weight:600; white-space:nowrap; }
+  .badge-grow { background:rgba(34,197,94,.15); color:#4ade80; border:1px solid rgba(34,197,94,.35); }
+  .badge-rise { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.35); }
+  .badge-s4onprem { background:rgba(167,139,250,.15); color:#c4b5fd; border:1px solid rgba(167,139,250,.35); }
+  .badge-ecc { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.35); }
+  .badge-live { background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.35); }
+  .badge-signed { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.35); }
+  .badge-transition { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.35); }
+  .badge-no { background:rgba(239,68,68,.15); color:#f87171; border:1px solid rgba(239,68,68,.35); }
+  .badge-unknown { background:rgba(100,116,139,.2); color:#94a3b8; border:1px solid rgba(100,116,139,.4); }
+  .footer { margin-top:24px; padding-top:16px; border-top:1px solid var(--border); color:var(--muted); font-size:12px; text-align:center; font-style:italic; }
+</style>
+</head>
+<body>
+  <h1>North American Nuclear Utilities — SAP Landscape</h1>
+  <div class="sub">26 parent operators across the United States, Canada, and Mexico. Compiled filed via SF/SN registry. Click column headers to sort. Click any link to open the underlying public source.</div>
+
+  <div class="summary">
+    <div class="card">
+      <div class="label">Deployment Class</div>
+      <div class="row"><span>On-Prem ECC</span><span>3</span></div><div class="row"><span>On-Prem S/4</span><span>0</span></div><div class="row"><span>S/4 Private Cloud (RISE)</span><span>0</span></div><div class="row"><span>S/4 Public Cloud (GROW)</span><span>0</span></div><div class="row"><span>Unknown</span><span>23</span></div>
+    </div>
+    <div class="card">
+      <div class="label">S/4 Status</div>
+      <div class="row"><span>Live</span><span>0</span></div><div class="row"><span>Signed</span><span>0</span></div><div class="row"><span>In transition</span><span>1</span></div><div class="row"><span>No / Still on ECC</span><span>3</span></div><div class="row"><span>Unknown</span><span>22</span></div>
+    </div>
+    <div class="card">
+      <div class="label">Country</div>
+      <div class="row"><span>United States</span><span>22</span></div><div class="row"><span>Mexico</span><span>1</span></div><div class="row"><span>Canada</span><span>3</span></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <input id="filter" placeholder="Filter: operator, country, executive, reactor site…" />
+    <select id="deployFilter">
+      <option value="">All deployments</option>
+      <option>On-Prem ECC</option>
+      <option>On-Prem S/4</option>
+      <option>S/4 Private Cloud (RISE)</option>
+      <option>S/4 Public Cloud (GROW)</option>
+      <option>Unknown</option>
+    </select>
+    <select id="countryFilter">
+      <option value="">All countries</option>
+      <option>Canada</option><option>Mexico</option><option>United States</option>
+    </select>
+  </div>
+
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th data-col="0">Operator</th>
+        <th data-col="1">Country / HQ</th>
+        <th data-col="2">Reactor Sites</th>
+        <th data-col="3">SAP Deployment</th>
+        <th data-col="4">Signed for S/4</th>
+        <th data-col="5">CIO</th>
+        <th data-col="6">CTO</th>
+        <th data-col="7">CFO</th>
+        <th data-col="8">Customer Satisfaction</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+    <tr>
+      <td class="op">Florida Power &amp; Light Company<div class="parent">NextEra Energy, Inc. (NYSE: NEE)</div></td>
+      <td>United States<div class="muted small">Juno Beach, Florida, United States</div></td>
+      <td class="reactors">St. Lucie Nuclear Plant — Units 1 and 2; Turkey Point Nuclear Plant — Units 3 and 4</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.investor.nexteraenergy.com" target="_blank" rel="noopener">NextEra Energy investor relations</a>, <a href="https://www.investor.nexteraenergy.com/~/media/Files/N/NEE-IR/reports-and-fillings/quarterly-earnings/2026/Q1%202026/Q1%202026%20Earnings%20Script%20vF.pdf" target="_blank" rel="noopener">Q1 2026 earnings call transcript</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Michael H. Dunne<div class="li"><span class="muted">—</span></div></td>
+      <td>ReliabilityOne® National Reliability Award (8 of the last 11 years); no current J.D. Power/ACSI numeric score found<div class="src"><a href="https://investingnews.com/nrc-authorizes-fpl-s-st-lucie-nuclear-plant-to-operate-for-another-20-years/" target="_blank" rel="noopener">Investing News Network summary of FPL St. Lucie renewal</a>, <a href="https://www.investor.nexteraenergy.com/~/media/Files/N/NEE-IR/reports-and-fillings/quarterly-earnings/2026/Q1%202026/2026-0423%20NEEQ12026News%20Release%20vF.pdf" target="_blank" rel="noopener">NextEra Energy Q1 2026 release</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Tennessee Valley Authority (TVA)<div class="parent">Tennessee Valley Authority (federal public corporation; no stock ticker)</div></td>
+      <td>United States<div class="muted small">Knoxville, Tennessee, United States</div></td>
+      <td class="reactors">Browns Ferry Nuclear Plant — Unit 1, Unit 2, Unit 3; Sequoyah Nuclear Plant — Unit 1, Unit 2; Watts Bar Nuclear Plant — Unit 1, Unit 2</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.sap.com/industries/utilities.html" target="_blank" rel="noopener">SAP Utilities Software</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Tammy Wilson<div class="li"><a href="https://www.linkedin.com/in/twwilson" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>John Thomas<div class="li"><a href="https://www.linkedin.com/in/john-thomas-aab4b517" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Duke Energy Corporation<div class="parent">Duke Energy Corporation (NYSE: DUK)</div></td>
+      <td>United States<div class="muted small">Charlotte, North Carolina</div></td>
+      <td class="reactors">Robinson Nuclear Plant (1 unit), Oconee Nuclear Station (3 units), Catawba Nuclear Station (2 units), McGuire Nuclear Station (2 units), Brunswick Nuclear Plant (2 units)</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener">SAP Customer Stories</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Richard Donaldson<div class="li"><a href="https://www.linkedin.com/in/richard-donaldson-b13637192" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Brian Savoy<div class="li"><a href="https://www.linkedin.com/in/brian-savoy-3b00434" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Dominion Energy Inc.<div class="parent">Dominion Energy Inc. (NYSE: D)</div></td>
+      <td>United States<div class="muted small">Richmond, Virginia</div></td>
+      <td class="reactors">North Anna Power Station (Units 1-2); Surry Power Station (Units 1-2); Millstone Power Station (Units 2-3)</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://investors.dominionenergy.com/financials-and-reports/sec-filings/sec-filings-details/default.aspx?FilingId=19400030" target="_blank" rel="noopener">Dominion Energy Investor Relations</a>, <a href="https://news.dominionenergy.com/overview/default.aspx" target="_blank" rel="noopener">Dominion Energy About</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Steven D. Ridge<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Constellation Energy Corporation<div class="parent">Constellation Energy Corporation (Nasdaq: CEG)</div></td>
+      <td>United States<div class="muted small">Baltimore, Maryland</div></td>
+      <td class="reactors">Calvert Cliffs 1-2; Clinton 1; FitzPatrick 1; Ginna 1; LaSalle 1-2; Limerick 1-2; Nine Mile Point 1-2; Salem 1-2; South Texas Project 1-2; Braidwood 1-2; Byron 1-2; Dresden 2-3; Quad Cities 1-2; Peach Bottom 2-3</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.constellationenergy.com/news/2026/05/constellation-reports-first-quarter-2026-results.html" target="_blank" rel="noopener">Constellation Q1 2026 Results</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Shane P. Smith<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">DTE Electric<div class="parent">DTE Energy Company (NYSE: DTE)</div></td>
+      <td>United States<div class="muted small">Detroit, Michigan, USA</div></td>
+      <td class="reactors">Fermi 2 (single unit); DTE’s public filings also note nuclear-facility ownership/operation risk, but I could not confirm additional operating reactor units in the time available.</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://ir.dteenergy.com/news/press-release-details/2026/DTE-Energy-reports-first-quarter-2026-accomplishments-investments-and-financial-results/default.aspx" target="_blank" rel="noopener">DTE Energy IR</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>David Ruud<div class="li"><span class="muted">—</span></div></td>
+      <td>ACSI lists DTE Energy in Electric Investor-Owned Utilities, but I could not verify a current public numeric score from the source page in time.<div class="src"><a href="https://theacsi.org/companies/" target="_blank" rel="noopener">ACSI Companies Archive</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Entergy Corporation<div class="parent">Entergy Corporation (NYSE: ETR)</div></td>
+      <td>United States<div class="muted small">New Orleans, Louisiana</div></td>
+      <td class="reactors">Arkansas Nuclear One (Units 1 and 2) in Russellville, Arkansas; Grand Gulf Nuclear Station in Port Gibson, Mississippi; River Bend Station in St. Francisville, Louisiana; Waterford 3 Steam Electric Station in Killona, Louisiana. Entergy says it owns, operates, and supports five nuclear units across four locations.</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener">SAP Customer Stories</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Kimberly Fontan<div class="li"><a href="https://www.linkedin.com/posts/kimberly-fontan-29a0986a_entergy-reports-first-quarter-2026-financial-activity-7455444989721096192-2Yzq" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><a href="https://theacsi.org/companies/" target="_blank" rel="noopener">ACSI Companies Archive</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Pacific Gas &amp; Electric Company (PG&amp;E)<div class="parent">PG&amp;E Corporation (NYSE: PCG)</div></td>
+      <td>United States<div class="muted small">Oakland, California</div></td>
+      <td class="reactors">Diablo Canyon Power Plant — Unit 1 and Unit 2</td>
+      <td><span class="badge badge-ecc">On-Prem ECC</span><div class="src"><a href="https://jobs.pge.com/job/oakland/sap-ui-ux-programmer-expert/29673/95309523808" target="_blank" rel="noopener">PG&amp;E Careers</a>, <a href="https://jobs.pge.com/job/oakland/business-analyst/29673/95086616928" target="_blank" rel="noopener">PG&amp;E Careers</a>, <a href="https://careers.pge.com/job/Oakland-Major-Projects-Post-Awards-Contract-Administrator,-Principal-CA-94612/1313186700/" target="_blank" rel="noopener">PG&amp;E Careers</a></div></td>
+      <td><span class="badge badge-no">No / Still on ECC</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Carolyn J. Burke<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Vistra Corp. / Luminant<div class="parent">Vistra Corp. (NYSE: VST)</div></td>
+      <td>United States<div class="muted small">Irving, Texas</div></td>
+      <td class="reactors">Comanche Peak Nuclear Power Plant Units 1 and 2; Perry Nuclear Power Plant Unit 1; plus acquired Energy Harbor nuclear fleet, which Vistra describes as a 4,000-megawatt nuclear generation fleet and its second-largest competitive nuclear fleet in the country</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://vistracorp.com/about/leadership/" target="_blank" rel="noopener">Vistra leadership</a>, <a href="https://investor.vistracorp.com/news?l=50" target="_blank" rel="noopener">Vistra investor news</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Tom Farrah<div class="li"><span class="muted">—</span></div></td>
+      <td>Tom Farrah<div class="li"><span class="muted">—</span></div></td>
+      <td>Kris Moldovan<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Energy Harbor LLC<div class="parent">Vistra Corp. (NYSE: VST)</div></td>
+      <td>United States<div class="muted small">Akron, Ohio, United States</div></td>
+      <td class="reactors">Beaver Valley 1, Beaver Valley 2; Davis-Besse 1; Perry 1</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://hub.vistracorp.com/author/vistrahub/" target="_blank" rel="noopener">Vistra Completes Energy Harbor Acquisition</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Daniel J. Ronnenberg<div class="li"><a href="https://www.linkedin.com/in/dronnenberg" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Daniel J. Ronnenberg<div class="li"><a href="https://www.linkedin.com/in/dronnenberg" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Jason Petrik<div class="li"><a href="https://www.linkedin.com/in/jason-petrik-79058151" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>BBB rating: 4.1 stars (legacy Energy Harbor, per public LinkedIn biography note)<div class="src"><a href="https://www.bbb.org/" target="_blank" rel="noopener">Better Business Bureau</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Xcel Energy / Northern States Power<div class="parent">Xcel Energy Inc. (XEL)</div></td>
+      <td>United States<div class="muted small">Minneapolis, Minnesota</div></td>
+      <td class="reactors">Monticello Nuclear Generating Plant — Unit 1; Prairie Island Nuclear Generating Plant — Units 1 and 2</td>
+      <td><span class="badge badge-ecc">On-Prem ECC</span><div class="src"><a href="https://jobs.xcelenergy.com/administrative-operations-specialist/job/3050874FD43DF48A0C3B973B94EEB76C" target="_blank" rel="noopener">Xcel Energy Careers</a>, <a href="https://jobs.xcelenergy.com/business-analyst-intern-waite-park-mn/job/313907218EBC8FE0DDE643720746E566" target="_blank" rel="noopener">Xcel Energy Careers</a></div></td>
+      <td><span class="badge badge-no">No / Still on ECC</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Brian J. Van Abel<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><a href="https://theacsi.org" target="_blank" rel="noopener">American Customer Satisfaction Index</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Ameren Missouri (Union Electric Company)<div class="parent">Ameren Corporation (NYSE: AEE)</div></td>
+      <td>United States<div class="muted small">St. Louis, Missouri, United States</div></td>
+      <td class="reactors">Callaway Energy Center (1 unit, Callaway County, Missouri)</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.ameren.com/-/media/files/our-company/generation/callaway-fact-sheet.ashx" target="_blank" rel="noopener">Ameren Callaway Fact Sheet 2025</a>, <a href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener">SAP Customer Stories</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Michael L. Moehn<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Energy Northwest<div class="parent">Energy Northwest (non-profit joint operating agency; no public ticker)</div></td>
+      <td>United States<div class="muted small">Richland, Washington, United States</div></td>
+      <td class="reactors">Columbia Generating Station — 1 unit (BWR-5, 1,207 MWe net; nuclear only)</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.sap.com/industries/utilities.html" target="_blank" rel="noopener">SAP Energy &amp; Utilities</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Marcus Harris<div class="li"><a href="https://www.linkedin.com/posts/energy-northwest_energy-northwest-is-pleased-to-share-that-activity-7454892649318178816-adD0" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><a href="https://theacsi.org" target="_blank" rel="noopener">ACSI</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Arizona Public Service (APS)<div class="parent">Pinnacle West Capital Corp. (NYSE: PNW)</div></td>
+      <td>United States<div class="muted small">Phoenix, Arizona, United States</div></td>
+      <td class="reactors">Palo Verde Generating Station — Units 1, 2, and 3</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.pinnaclewest.com/investors/reports/sec-filings/default.aspx" target="_blank" rel="noopener">Pinnacle West SEC Filings</a>, <a href="https://careers.aps.com/go/Internship/8829300/" target="_blank" rel="noopener">APS Careers</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Michelle Ferrara<div class="li"><a href="https://www.linkedin.com/posts/biancalochner_top-it-leaders-in-arizona-to-watch-activity-7455728782629314560-vy12" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Ted Geisler<div class="li"><a href="https://www.linkedin.com/posts/ted-geisler-556b7912_iworkataps-aps140-arizona-activity-7455265896241188865-QbX_" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><a href="https://theacsi.org" target="_blank" rel="noopener">ACSI</a>, <a href="https://www.bbb.org" target="_blank" rel="noopener">BBB</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Southern Nuclear Operating Company<div class="parent">The Southern Company (NYSE: SO)</div></td>
+      <td>United States<div class="muted small">Atlanta, Georgia</div></td>
+      <td class="reactors">Vogtle Units 1, 2, 3, 4; Edwin I. Hatch Units 1, 2; Joseph M. Farley Units 1, 2</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.sec.gov/Archives/edgar/data/1004155/000009212226000036/so-20260430.htm" target="_blank" rel="noopener">Southern Company SEC filing</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>David Poroch<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Wolf Creek Nuclear Operating Corporation<div class="parent">Evergy, Inc. (NASDAQ: EVRG)</div></td>
+      <td>United States<div class="muted small">Burlington, Kansas</div></td>
+      <td class="reactors">Wolf Creek Generating Station — Unit 1 (single-unit pressurized water reactor)</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://investors.evergy.com/news-releases/news-release-details/evergy-announces-first-quarter-2026-results-announces-new-large" target="_blank" rel="noopener">Evergy Investor Relations</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>W. Bryan Buckler<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><a href="https://theacsi.org" target="_blank" rel="noopener">ACSI</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Austin Energy<div class="parent">City of Austin (municipal utility; no public ticker)</div></td>
+      <td>United States<div class="muted small">Austin, Texas, United States</div></td>
+      <td class="reactors">South Texas Project (Bay City, TX) — co-owner of 16% of Units 1 and 2; STPNOC manages the plant</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://austinenergy.com/about/company-profile/executive-leadership-team" target="_blank" rel="noopener">Austin Energy Executive Leadership Team</a>, <a href="https://austinenergy.com/about/company-profile/electric-system/power-plants" target="_blank" rel="noopener">Austin Energy Power Plants</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Elaine Veselka (Vice President, Technology and Data; CIO-equivalent)<div class="li"><a href="https://www.linkedin.com/in/elaine-veselka-0b7a1b19" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>David Tomczyszyn (Vice President, Electric System Engineering &amp; Technical Services; CTO-equivalent)<div class="li"><a href="https://www.linkedin.com/in/david-tomczyszyn-0a3a6a45" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>John Davis (Interim Senior Vice President and Chief Financial Officer)<div class="li"><a href="https://www.linkedin.com/in/johnandrewdavis" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>No public satisfaction score found; Austin Energy instead publishes reliability metrics (0.98 annual interruptions/customer vs 1.40 statewide average; 74.30 min interruption length vs 153.40 statewide average)<div class="src"><a href="https://austinenergy.com/about/company-profile/benefits-of-public-power" target="_blank" rel="noopener">Austin Energy Public Power Works for You</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Nebraska Public Power District (NPPD)<div class="parent">Public power district; no parent company / no ticker</div></td>
+      <td>United States<div class="muted small">Columbus, Nebraska</div></td>
+      <td class="reactors">Cooper Nuclear Station (Brownville, Nebraska) — 1 reactor unit</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.nppd.com/newsroom/press-releases" target="_blank" rel="noopener">NPPD Press Releases</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Laura Kapustka<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">STP Nuclear Operating Company<div class="parent">Major owners: NRG Energy (NYSE: NRG), CPS Energy (public utility), City Public Service of San Antonio / also known as CPS Energy (public utility), and Austin Energy (public utility)</div></td>
+      <td>United States<div class="muted small">Bay City, Texas, United States</div></td>
+      <td class="reactors">South Texas Project Electric Generating Station: Unit 1, Unit 2</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener">SAP Customer Stories</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Comisión Federal de Electricidad (CFE)<div class="parent">Comisión Federal de Electricidad (state-owned; no ticker)</div></td>
+      <td>Mexico<div class="muted small">Mexico City, Mexico</div></td>
+      <td class="reactors">Central Nucleoeléctrica Laguna Verde (Veracruz) — Units 1 and 2</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener">SAP customer stories page</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Francisco Javier Maldonado Ramos<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Bruce Power<div class="parent">Canadian-owned partnership of TC Energy (TSX: TRP), OMERS, the Power Workers’ Union, and The Society of United Professionals</div></td>
+      <td>Canada<div class="muted small">Kincardine, Ontario</div></td>
+      <td class="reactors">Bruce Nuclear Generating Station: Units 1, 2, 3, 4, 5, 6, 7, and 8 (Bruce A: Units 1-4; Bruce B: Units 5-8)</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.brucepower.com" target="_blank" rel="noopener">Bruce Power</a>, <a href="https://www.brucepower.com/publications/bruce-power-2025-annual-review-powering-the-future/" target="_blank" rel="noopener">Bruce Power 2025 Annual Review</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="src"><a href="https://www.brucepower.com" target="_blank" rel="noopener">Bruce Power</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Ontario Power Generation<div class="parent">Ontario provincial Crown corporation (no stock ticker)</div></td>
+      <td>Canada<div class="muted small">Toronto, Ontario, Canada</div></td>
+      <td class="reactors">Darlington Nuclear Generating Station: 4 units (Units 1-4); Pickering Nuclear Generating Station: 8 reactors (Units 5-8 operating; Units 1 and 4 shut down to safe storage; Units 2 and 3 in safe storage).</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://events.sap.com/eaa-learning-yyz/en_us/home.html" target="_blank" rel="noopener">SAP Enterprise Architect Day of Learning</a></div></td>
+      <td><span class="badge badge-transition">In transition</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Aida Cipolla<div class="li"><a href="https://www.linkedin.com/posts/aida-cipolla-fcpa-fca-icd-d_98775328_robbestexec-activity-7453867159996334080-VRXV" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">Holtec International<div class="parent">Holtec International (private; no stock ticker public)</div></td>
+      <td>United States<div class="muted small">Camden, New Jersey, United States</div></td>
+      <td class="reactors">Palisades Nuclear Plant — Unit 1; Pioneer 1 and Pioneer 2 are planned SMR-300 units at the Palisades site, but not yet operating. Holtec&#x27;s public pages do not clearly list additional commercial reactor units operated by Holtec as an operator.</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://news.sap.com" target="_blank" rel="noopener">SAP News Center</a>, <a href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener">SAP Customer Stories</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Dr. Stefan Anton<div class="li"><a href="https://www.linkedin.com/in/stefan-anton-a5431271" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Thomas P. Howe<div class="li"><a href="https://www.linkedin.com/in/tom-howe-a207961b" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">CPS Energy<div class="parent">Municipal utility owned by City of San Antonio; no public stock ticker</div></td>
+      <td>United States<div class="muted small">San Antonio, Texas</div></td>
+      <td class="reactors">South Texas Project (40% ownership; units 1 and 2 via STP 1&amp;2)</td>
+      <td><span class="badge badge-ecc">On-Prem ECC</span><div class="src"><a href="https://www.cpsenergy.com/content/dam/corporate/en/Documents/Finance/FY2027_Budget_Plan_ADA.pdf" target="_blank" rel="noopener">CPS Energy FY2027 Financial Plan</a>, <a href="https://careers.cpsenergy.com/job/San-Antonio-Mgr-General-Auditing-TX-78205/1384745700/" target="_blank" rel="noopener">CPS Energy Careers - Mgr General Auditing</a></div></td>
+      <td><span class="badge badge-no">No / Still on ECC</span></td>
+      <td>Evan O&#x27;Mahoney<div class="li"><a href="https://www.linkedin.com/posts/leaders-on-purpose_consensus2026-aileadership-trustworthyai-activity-7455954800350867456-jN2-/" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="li"><span class="muted">—</span></div></td>
+      <td>Cory Kuchinsky<div class="li"><a href="https://www.linkedin.com/in/corykuchinsky" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><span class="muted">—</span></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">New Brunswick Power Corporation<div class="parent">New Brunswick Power Corporation (Crown corporation; no public ticker)</div></td>
+      <td>Canada<div class="muted small">Fredericton, New Brunswick</div></td>
+      <td class="reactors">Point Lepreau Nuclear Generating Station — 1 unit (Point Lepreau 1 / CANDU 6)</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://www.nbpower.com/en/about-us/projects/renewables-integration-grid-security-rigs-project" target="_blank" rel="noopener">NB Power RIGS project page</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Unknown (publicly found IT/security equivalent: Ann Marie Payne)<div class="li"><a href="https://www.linkedin.com/in/ann-marie-payne-114724b1" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Tony O&#x27;hara<div class="li"><a href="https://www.linkedin.com/in/tony-o-hara-8257aa69" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Justin Urquhart<div class="li"><a href="https://www.linkedin.com/in/justin-urquhart-44179211a" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><a href="https://www.bbb.org/ca/nb/" target="_blank" rel="noopener">BBB</a></div></td>
+    </tr>
+    
+
+    <tr>
+      <td class="op">American Electric Power (Indiana Michigan Power)<div class="parent">American Electric Power (Nasdaq: AEP)</div></td>
+      <td>United States<div class="muted small">Columbus, Ohio</div></td>
+      <td class="reactors">D.C. Cook Nuclear Plant (Donald C. Cook), Units 1 and 2, Bridgman, Michigan</td>
+      <td><span class="badge badge-unknown">Unknown</span><div class="src"><a href="https://news.sap.com/2026/05/sap-sapphire-sap-unveils-autonomous-enterprise/" target="_blank" rel="noopener">SAP News</a></div></td>
+      <td><span class="badge badge-unknown">Unknown</span></td>
+      <td>Johannes Eckert<div class="li"><a href="https://www.linkedin.com/in/johannes-eckert/" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Johannes Eckert<div class="li"><a href="https://www.linkedin.com/in/johannes-eckert/" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Trevor I. Mihalik<div class="li"><a href="https://www.linkedin.com/in/trevor-mihalik/" target="_blank" rel="noopener">LinkedIn</a></div></td>
+      <td>Unknown<div class="src"><a href="https://theacsi.org/" target="_blank" rel="noopener">American Customer Satisfaction Index</a></div></td>
+    </tr>
+    
+    </tbody>
+  </table>
+
+  <div class="footer">SIN-EVE-2026-0521-NUC-NASCAN-04-001 · SF/SN incident registry, EVE Glyph Design · pour le bien-être du peuple</div>
+
+<script>
+  const inp = document.getElementById('filter');
+  const dep = document.getElementById('deployFilter');
+  const ctry = document.getElementById('countryFilter');
+  const rows = Array.from(document.querySelectorAll('#tbl tbody tr'));
+  function apply() {
+    const q = inp.value.toLowerCase();
+    const d = dep.value.toLowerCase();
+    const c = ctry.value.toLowerCase();
+    rows.forEach(r => {
+      const txt = r.textContent.toLowerCase();
+      let show = (!q || txt.includes(q)) && (!c || (r.children[1].textContent.toLowerCase().includes(c)));
+      if (show && d) {
+        const dep = r.children[3].textContent.toLowerCase();
+        if (d === 'unknown') show = dep.includes('unknown');
+        else show = dep.includes(d);
+      }
+      r.style.display = show ? '' : 'none';
+    });
+  }
+  [inp, dep, ctry].forEach(el => el.addEventListener('input', apply));
+
+  // Click-to-sort
+  let sortCol = -1, sortAsc = true;
+  document.querySelectorAll('#tbl thead th').forEach((th, i) => {
+    th.addEventListener('click', () => {
+      if (sortCol === i) sortAsc = !sortAsc; else { sortCol = i; sortAsc = true; }
+      const sorted = rows.slice().sort((a,b) => {
+        const av = a.children[i].textContent.trim().toLowerCase();
+        const bv = b.children[i].textContent.trim().toLowerCase();
+        return (av < bv ? -1 : av > bv ? 1 : 0) * (sortAsc ? 1 : -1);
+      });
+      const tbody = document.querySelector('#tbl tbody');
+      sorted.forEach(r => tbody.appendChild(r));
+    });
+  });
+</script>
+</body>
+</html>
