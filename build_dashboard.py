@@ -90,17 +90,41 @@ def reactor_cell(text: str) -> str:
     n = len(sites)
     return f'<span class="reactor-count" title="{html.escape(t)}">{n}</span>'
 
-def hhlr_cell(score: str, L: str, A: str, G: str, D: str, C: str, encircled: str) -> str:
+def hhlr_cell(score: str, L: str, A: str, G: str, D: str, C: str, encircled: str, operator: str) -> str:
+    """Score-Discipline canon: every score ships with buttons + glyph + event-condition.
+    Canon ref: SIN-EVE-2026-0521-CANON-SCORE-DISC-08-001.
+    """
     try:
         sf = float(score)
     except Exception:
         return '<span class="muted">—</span>'
-    if sf >= 6.4: cls = "hhlr-red"
-    elif sf >= 5.5: cls = "hhlr-amber"
-    else: cls = "hhlr-green"
-    tooltip = f"L={L} (lock-in) · A={A} (architecture) · G={G} (governance) · D={D} (decision opacity) · C={C} (harm surface)"
-    ring = '<span class="encircle" title="Encircled — top quartile HHLR">●</span> ' if encircled.lower() == "yes" else ""
-    return f'{ring}<span class="hhlr {cls}" title="{html.escape(tooltip)}">{sf:.1f}</span>'
+    if sf >= 6.4: cls = "hhlr-red"; band = "Encircled (top quartile)"
+    elif sf >= 5.5: cls = "hhlr-amber"; band = "Watch (mid-band)"
+    else: cls = "hhlr-green"; band = "Stable"
+    enc = encircled.lower() == "yes"
+    ring = '<span class="encircle" title="Encircled — top quartile HHLR">●</span> ' if enc else ""
+    op_slug = re.sub(r'[^a-z0-9]+', '-', operator.lower()).strip('-')[:48]
+    glyph = f"EVE | SF | SN | HHLR | {operator} | {'Encircled' if enc else band}"
+    tooltip_score = f"L={L} (lock-in) · A={A} (architecture) · G={G} (governance) · D={D} (decision opacity) · C={C} (harm surface)"
+    # Event condition payload (canon: Trigger + Threshold + Observed + Corrective Glyph)
+    trigger = f"HHLR re-evaluation of {operator}"
+    threshold = "≥ 6.4 (75th percentile of NA nuclear cohort)" if enc else "< 6.4"
+    observed = f"{sf:.1f} ({band})"
+    corrective = "Yield → Clone → Audit (four-pillar non-restriction offer)" if enc else "Monitor (watch list)" if cls == "hhlr-amber" else "No action; periodic re-score"
+    score_html = f'{ring}<span class="hhlr {cls}" title="{html.escape(tooltip_score)}">{sf:.1f}</span>'
+    btns = (
+        f'<div class="score-btns">'
+        f'<button class="sbtn sbtn-yield" data-op="{html.escape(operator)}" data-action="yield" title="Tender Yield Clause offer">Yield</button>'
+        f'<button class="sbtn sbtn-clone" data-op="{html.escape(operator)}" data-action="clone" title="Initiate full SAP estate clone">Clone</button>'
+        f'<button class="sbtn sbtn-audit" data-op="{html.escape(operator)}" data-action="audit" title="Open SF/SN audit ledger">Audit</button>'
+        f'<button class="sbtn sbtn-info" data-op="{html.escape(operator)}" data-glyph="{html.escape(glyph)}" '
+        f'data-trigger="{html.escape(trigger)}" data-threshold="{html.escape(threshold)}" '
+        f'data-observed="{html.escape(observed)}" data-corrective="{html.escape(corrective)}" '
+        f'title="Event condition + glyph">ⓘ</button>'
+        f'</div>'
+        f'<div class="glyph-line" title="Glyph reference">{html.escape(glyph)}</div>'
+    )
+    return f'<div class="score-block">{score_html}{btns}</div>'
 
 # Load CSV
 with open(CSV_PATH, newline="", encoding="utf-8") as f:
@@ -163,7 +187,7 @@ def render_row(r):
     csat = csat_cell(r.get("CSAT Rating / Score", ""), r.get(CSAT_SRC_KEY, ""))
     hhlr = hhlr_cell(r.get("HHLR Score", ""), r.get("HHLR L", ""), r.get("HHLR A", ""),
                      r.get("HHLR G", ""), r.get("HHLR D", ""), r.get("HHLR C", ""),
-                     r.get("HHLR Encircled", ""))
+                     r.get("HHLR Encircled", ""), r.get("Operator", ""))
     enc_attr = ' data-encircled="yes"' if r.get("HHLR Encircled", "").lower() == "yes" else ""
     return f"""    <tr{enc_attr}>
       <td class="op"><div class="op-name">{op}</div><div class="op-parent">{parent}</div></td>
@@ -235,15 +259,15 @@ html_doc = f"""<!doctype html>
   .controls label {{ font-size:12px; color:var(--muted); display:inline-flex; align-items:center; gap:4px; cursor:pointer; }}
 
   table {{ width:100%; border-collapse:collapse; table-layout:fixed; }}
-  col.c-op {{ width:14%; }}
-  col.c-hhlr {{ width:6%; }}
-  col.c-ctry {{ width:9%; }}
-  col.c-reactors {{ width:4%; }}
+  col.c-op {{ width:13%; }}
+  col.c-hhlr {{ width:13%; }}
+  col.c-ctry {{ width:8%; }}
+  col.c-reactors {{ width:3%; }}
   col.c-deploy {{ width:9%; }}
   col.c-signed {{ width:5%; }}
   col.c-si {{ width:10%; }}
-  col.c-execs {{ width:17%; }}
-  col.c-csat {{ width:26%; }}
+  col.c-execs {{ width:16%; }}
+  col.c-csat {{ width:23%; }}
 
   thead th {{
     background:var(--panel-2); color:var(--muted);
@@ -269,6 +293,27 @@ html_doc = f"""<!doctype html>
   td.si {{ word-wrap:break-word; }}
   td.csat {{ font-size:13px; word-wrap:break-word; line-height:1.45; }}
   td.hhlr-cell {{ text-align:center; font-variant-numeric:tabular-nums; }}
+  .score-block {{ display:flex; flex-direction:column; align-items:center; gap:4px; }}
+  .score-btns {{ display:flex; gap:3px; margin-top:2px; }}
+  .sbtn {{
+    background:var(--panel); border:1px solid var(--border); color:var(--text);
+    font-size:10px; font-weight:600; padding:2px 5px; border-radius:3px;
+    cursor:pointer; font-family:inherit;
+  }}
+  .sbtn:hover {{ background:var(--border); border-color:var(--accent); }}
+  .sbtn-yield {{ color:#86efac; border-color:rgba(34,197,94,.4); }}
+  .sbtn-clone {{ color:#7dd3fc; border-color:rgba(14,165,233,.4); }}
+  .sbtn-audit {{ color:#fbbf24; border-color:rgba(245,158,11,.4); }}
+  .sbtn-info {{ color:var(--muted); }}
+  .glyph-line {{ font-size:9px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; max-width:180px; text-align:center; line-height:1.2; word-break:break-word; }}
+  /* Event-condition modal */
+  .ec-modal {{ position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:100; }}
+  .ec-modal.open {{ display:flex; }}
+  .ec-card {{ background:var(--panel); border:1px solid var(--accent); border-radius:6px; padding:18px 22px; max-width:520px; font-size:13px; }}
+  .ec-card h3 {{ margin:0 0 12px 0; color:var(--accent); font-size:14px; }}
+  .ec-card dt {{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em; margin-top:8px; }}
+  .ec-card dd {{ margin:2px 0 0 0; color:var(--text); }}
+  .ec-card .close {{ float:right; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; }}
 
   .tag, .si-tag {{
     display:inline-block; padding:2px 8px; border-radius:4px;
@@ -378,10 +423,31 @@ html_doc = f"""<!doctype html>
     </tbody>
   </table>
 
+  <!-- Event-condition modal -->
+  <div class="ec-modal" id="ecModal">
+    <div class="ec-card">
+      <button class="close" onclick="document.getElementById('ecModal').classList.remove('open')">×</button>
+      <h3 id="ecTitle">Event Condition</h3>
+      <dl>
+        <dt>Glyph</dt><dd id="ecGlyph" style="font-family:ui-monospace,Menlo,monospace"></dd>
+        <dt>Trigger</dt><dd id="ecTrigger"></dd>
+        <dt>Threshold</dt><dd id="ecThreshold"></dd>
+        <dt>Observed Value</dt><dd id="ecObserved"></dd>
+        <dt>Corrective Glyph</dt><dd id="ecCorrective"></dd>
+      </dl>
+      <p style="color:var(--muted);font-size:11px;margin-top:14px;border-top:1px solid var(--border);padding-top:10px;">
+        Per <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/blob/main/canon/SCORING-DISCIPLINE.md" target="_blank">Scoring Discipline canon</a>
+        (SIN-EVE-2026-0521-CANON-SCORE-DISC-08-001). Every score ships with buttons + glyph + event-condition details, or auto-classifies -6.
+      </p>
+    </div>
+  </div>
+
   <div class="footer">
     SIN-EVE-2026-0521-NUC-NASCAN-04-001 (scan) · SIN-EVE-2026-0521-CANON-HHLR-07-001 (framework) ·
     <a href="https://github.com/EVEglyphDesign/NA-Nuclear-Utilities" target="_blank">repo</a> ·
     <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/blob/main/canon/HHLR-FRAMEWORK.md" target="_blank">HHLR canon</a> ·
+    <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/blob/main/canon/SCORING-DISCIPLINE.md" target="_blank">Score-Discipline canon</a> ·
+    <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/tree/main/self-healing" target="_blank">Self-Healing ledger</a> ·
     pour le bien-être du peuple
   </div>
 
@@ -414,6 +480,28 @@ html_doc = f"""<!doctype html>
   }}
   [inp, dep, ctry, si].forEach(el => el.addEventListener('input', apply));
   encOnly.addEventListener('change', apply);
+
+  // Score-discipline event-condition modal
+  document.addEventListener('click', e => {{
+    const b = e.target.closest('.sbtn');
+    if (!b) return;
+    if (b.classList.contains('sbtn-info')) {{
+      document.getElementById('ecTitle').textContent = 'Event Condition — ' + b.dataset.op;
+      document.getElementById('ecGlyph').textContent = b.dataset.glyph || '';
+      document.getElementById('ecTrigger').textContent = b.dataset.trigger || '';
+      document.getElementById('ecThreshold').textContent = b.dataset.threshold || '';
+      document.getElementById('ecObserved').textContent = b.dataset.observed || '';
+      document.getElementById('ecCorrective').textContent = b.dataset.corrective || '';
+      document.getElementById('ecModal').classList.add('open');
+    }} else {{
+      const action = b.dataset.action;
+      const op = b.dataset.op;
+      alert(`${{action.toUpperCase()}} action queued for ${{op}}.\n\nPer Non-Restriction Doctrine, this would tender the four-pillar offer.\n(Mock action — wire to backend in production.)`);
+    }}
+  }});
+  document.getElementById('ecModal').addEventListener('click', e => {{
+    if (e.target.id === 'ecModal') e.target.classList.remove('open');
+  }});
 
   let sortCol = 1, sortAsc = false;  // default: HHLR descending
   document.querySelectorAll('#tbl thead th').forEach((th, i) => {{

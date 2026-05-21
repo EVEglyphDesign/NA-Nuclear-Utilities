@@ -48,15 +48,15 @@
   .controls label { font-size:12px; color:var(--muted); display:inline-flex; align-items:center; gap:4px; cursor:pointer; }
 
   table { width:100%; border-collapse:collapse; table-layout:fixed; }
-  col.c-op { width:14%; }
-  col.c-hhlr { width:6%; }
-  col.c-ctry { width:9%; }
-  col.c-reactors { width:4%; }
+  col.c-op { width:13%; }
+  col.c-hhlr { width:13%; }
+  col.c-ctry { width:8%; }
+  col.c-reactors { width:3%; }
   col.c-deploy { width:9%; }
   col.c-signed { width:5%; }
   col.c-si { width:10%; }
-  col.c-execs { width:17%; }
-  col.c-csat { width:26%; }
+  col.c-execs { width:16%; }
+  col.c-csat { width:23%; }
 
   thead th {
     background:var(--panel-2); color:var(--muted);
@@ -82,6 +82,27 @@
   td.si { word-wrap:break-word; }
   td.csat { font-size:13px; word-wrap:break-word; line-height:1.45; }
   td.hhlr-cell { text-align:center; font-variant-numeric:tabular-nums; }
+  .score-block { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .score-btns { display:flex; gap:3px; margin-top:2px; }
+  .sbtn {
+    background:var(--panel); border:1px solid var(--border); color:var(--text);
+    font-size:10px; font-weight:600; padding:2px 5px; border-radius:3px;
+    cursor:pointer; font-family:inherit;
+  }
+  .sbtn:hover { background:var(--border); border-color:var(--accent); }
+  .sbtn-yield { color:#86efac; border-color:rgba(34,197,94,.4); }
+  .sbtn-clone { color:#7dd3fc; border-color:rgba(14,165,233,.4); }
+  .sbtn-audit { color:#fbbf24; border-color:rgba(245,158,11,.4); }
+  .sbtn-info { color:var(--muted); }
+  .glyph-line { font-size:9px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; max-width:180px; text-align:center; line-height:1.2; word-break:break-word; }
+  /* Event-condition modal */
+  .ec-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:100; }
+  .ec-modal.open { display:flex; }
+  .ec-card { background:var(--panel); border:1px solid var(--accent); border-radius:6px; padding:18px 22px; max-width:520px; font-size:13px; }
+  .ec-card h3 { margin:0 0 12px 0; color:var(--accent); font-size:14px; }
+  .ec-card dt { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em; margin-top:8px; }
+  .ec-card dd { margin:2px 0 0 0; color:var(--text); }
+  .ec-card .close { float:right; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; }
 
   .tag, .si-tag {
     display:inline-block; padding:2px 8px; border-radius:4px;
@@ -189,7 +210,7 @@
     <tbody>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">Xcel Energy / Northern States Power</div><div class="op-parent">Xcel Energy Inc. (XEL)</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=10 (lock-in) · A=9 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=6 (harm surface)">7.4</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=10 (lock-in) · A=9 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=6 (harm surface)">7.4</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Xcel Energy / Northern States Power" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Xcel Energy / Northern States Power" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Xcel Energy / Northern States Power" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Xcel Energy / Northern States Power" data-glyph="EVE | SF | SN | HHLR | Xcel Energy / Northern States Power | Encircled" data-trigger="HHLR re-evaluation of Xcel Energy / Northern States Power" data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="7.4 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Xcel Energy / Northern States Power | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">Minneapolis, Minnesota</span></td>
       <td class="reactors"><span class="reactor-count" title="Monticello Nuclear Generating Plant — Unit 1; Prairie Island Nuclear Generating Plant — Units 1 and 2">2</span></td>
       <td class="deploy"><span class="tag tag-ecc">On-Prem ECC</span> <a class="srcchip" href="https://jobs.xcelenergy.com/administrative-operations-specialist/job/3050874FD43DF48A0C3B973B94EEB76C" target="_blank" rel="noopener" title="Xcel Energy Careers">[1]</a><a class="srcchip" href="https://jobs.xcelenergy.com/business-analyst-intern-waite-park-mn/job/313907218EBC8FE0DDE643720746E566" target="_blank" rel="noopener" title="Xcel Energy Careers">[2]</a></td>
@@ -200,7 +221,7 @@
     </tr>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">Pacific Gas &amp; Electric Company (PG&amp;E)</div><div class="op-parent">PG&amp;E Corporation (NYSE: PCG)</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=8 (lock-in) · A=9 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.8</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=8 (lock-in) · A=9 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.8</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Pacific Gas &amp; Electric Company (PG&amp;E)" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Pacific Gas &amp; Electric Company (PG&amp;E)" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Pacific Gas &amp; Electric Company (PG&amp;E)" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Pacific Gas &amp; Electric Company (PG&amp;E)" data-glyph="EVE | SF | SN | HHLR | Pacific Gas &amp; Electric Company (PG&amp;E) | Encircled" data-trigger="HHLR re-evaluation of Pacific Gas &amp; Electric Company (PG&amp;E)" data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="6.8 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Pacific Gas &amp; Electric Company (PG&amp;E) | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">Oakland, California</span></td>
       <td class="reactors"><span class="reactor-count" title="Diablo Canyon Power Plant — Unit 1 and Unit 2">1</span></td>
       <td class="deploy"><span class="tag tag-ecc">On-Prem ECC</span> <a class="srcchip" href="https://jobs.pge.com/job/oakland/sap-ui-ux-programmer-expert/29673/95309523808" target="_blank" rel="noopener" title="PG&amp;E Careers">[1]</a><a class="srcchip" href="https://jobs.pge.com/job/oakland/business-analyst/29673/95086616928" target="_blank" rel="noopener" title="PG&amp;E Careers">[2]</a><a class="srcchip" href="https://careers.pge.com/job/Oakland-Major-Projects-Post-Awards-Contract-Administrator,-Principal-CA-94612/1313186700/" target="_blank" rel="noopener" title="PG&amp;E Careers">[3]</a></td>
@@ -211,7 +232,7 @@
     </tr>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">Duke Energy Corporation</div><div class="op-parent">Duke Energy Corporation (NYSE: DUK)</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=8 (harm surface)">6.6</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=8 (harm surface)">6.6</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Duke Energy Corporation" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Duke Energy Corporation" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Duke Energy Corporation" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Duke Energy Corporation" data-glyph="EVE | SF | SN | HHLR | Duke Energy Corporation | Encircled" data-trigger="HHLR re-evaluation of Duke Energy Corporation" data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="6.6 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Duke Energy Corporation | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">Charlotte, North Carolina</span></td>
       <td class="reactors"><span class="reactor-count" title="Robinson Nuclear Plant (1 unit), Oconee Nuclear Station (3 units), Catawba Nuclear Station (2 units), McGuire Nuclear Station (2 units), Brunswick Nuclear Plant (2 units)">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener" title="SAP Customer Stories">[1]</a></td>
@@ -222,7 +243,7 @@
     </tr>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">Constellation Energy Corporation</div><div class="op-parent">Constellation Energy Corporation (Nasdaq: CEG)</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=8 (harm surface)">6.6</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=8 (harm surface)">6.6</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Constellation Energy Corporation" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Constellation Energy Corporation" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Constellation Energy Corporation" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Constellation Energy Corporation" data-glyph="EVE | SF | SN | HHLR | Constellation Energy Corporation | Encircled" data-trigger="HHLR re-evaluation of Constellation Energy Corporation" data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="6.6 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Constellation Energy Corporation | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">Baltimore, Maryland</span></td>
       <td class="reactors"><span class="reactor-count" title="Calvert Cliffs 1-2; Clinton 1; FitzPatrick 1; Ginna 1; LaSalle 1-2; Limerick 1-2; Nine Mile Point 1-2; Salem 1-2; South Texas Project 1-2; Braidwood 1-2; Byron 1-2; Dresden 2-3; Quad Cities 1-2; Peach Bottom 2-3">14</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.constellationenergy.com/news/2026/05/constellation-reports-first-quarter-2026-results.html" target="_blank" rel="noopener" title="Constellation Q1 2026 Results">[1]</a></td>
@@ -233,7 +254,7 @@
     </tr>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">Dominion Energy Inc.</div><div class="op-parent">Dominion Energy Inc. (NYSE: D)</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.4</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.4</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Dominion Energy Inc." data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Dominion Energy Inc." data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Dominion Energy Inc." data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Dominion Energy Inc." data-glyph="EVE | SF | SN | HHLR | Dominion Energy Inc. | Encircled" data-trigger="HHLR re-evaluation of Dominion Energy Inc." data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="6.4 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Dominion Energy Inc. | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">Richmond, Virginia</span></td>
       <td class="reactors"><span class="reactor-count" title="North Anna Power Station (Units 1-2); Surry Power Station (Units 1-2); Millstone Power Station (Units 2-3)">3</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://investors.dominionenergy.com/financials-and-reports/sec-filings/sec-filings-details/default.aspx?FilingId=19400030" target="_blank" rel="noopener" title="Dominion Energy Investor Relations">[1]</a><a class="srcchip" href="https://news.dominionenergy.com/overview/default.aspx" target="_blank" rel="noopener" title="Dominion Energy About">[2]</a></td>
@@ -244,7 +265,7 @@
     </tr>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">Entergy Corporation</div><div class="op-parent">Entergy Corporation (NYSE: ETR)</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.4</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.4</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Entergy Corporation" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Entergy Corporation" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Entergy Corporation" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Entergy Corporation" data-glyph="EVE | SF | SN | HHLR | Entergy Corporation | Encircled" data-trigger="HHLR re-evaluation of Entergy Corporation" data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="6.4 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Entergy Corporation | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">New Orleans, Louisiana</span></td>
       <td class="reactors"><span class="reactor-count" title="Arkansas Nuclear One (Units 1 and 2) in Russellville, Arkansas; Grand Gulf Nuclear Station in Port Gibson, Mississippi; River Bend Station in St. Francisville, Louisiana; Waterford 3 Steam Electric Station in Killona, Louisiana. Entergy says it owns, operates, and supports five nuclear units across four locations.">4</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener" title="SAP Customer Stories">[1]</a></td>
@@ -255,7 +276,7 @@
     </tr>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">Southern Nuclear Operating Company</div><div class="op-parent">The Southern Company (NYSE: SO)</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.4</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.4</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Southern Nuclear Operating Company" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Southern Nuclear Operating Company" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Southern Nuclear Operating Company" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Southern Nuclear Operating Company" data-glyph="EVE | SF | SN | HHLR | Southern Nuclear Operating Company | Encircled" data-trigger="HHLR re-evaluation of Southern Nuclear Operating Company" data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="6.4 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Southern Nuclear Operating Company | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">Atlanta, Georgia</span></td>
       <td class="reactors"><span class="reactor-count" title="Vogtle Units 1, 2, 3, 4; Edwin I. Hatch Units 1, 2; Joseph M. Farley Units 1, 2">3</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.sec.gov/Archives/edgar/data/1004155/000009212226000036/so-20260430.htm" target="_blank" rel="noopener" title="Southern Company SEC filing">[1]</a></td>
@@ -266,7 +287,7 @@
     </tr>
     <tr data-encircled="yes">
       <td class="op"><div class="op-name">CPS Energy</div><div class="op-parent">Municipal utility owned by City of San Antonio; no public stock ticker</div></td>
-      <td class="hhlr-cell"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=9 (lock-in) · A=9 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">6.4</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="encircle" title="Encircled — top quartile HHLR">●</span> <span class="hhlr hhlr-red" title="L=9 (lock-in) · A=9 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">6.4</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="CPS Energy" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="CPS Energy" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="CPS Energy" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="CPS Energy" data-glyph="EVE | SF | SN | HHLR | CPS Energy | Encircled" data-trigger="HHLR re-evaluation of CPS Energy" data-threshold="≥ 6.4 (75th percentile of NA nuclear cohort)" data-observed="6.4 (Encircled (top quartile))" data-corrective="Yield → Clone → Audit (four-pillar non-restriction offer)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | CPS Energy | Encircled</div></div></td>
       <td class="ctry">United States<span class="hq">San Antonio, Texas</span></td>
       <td class="reactors"><span class="reactor-count" title="South Texas Project (40% ownership; units 1 and 2 via STP 1&amp;2)">2</span></td>
       <td class="deploy"><span class="tag tag-ecc">On-Prem ECC</span> <a class="srcchip" href="https://www.cpsenergy.com/content/dam/corporate/en/Documents/Finance/FY2027_Budget_Plan_ADA.pdf" target="_blank" rel="noopener" title="CPS Energy FY2027 Financial Plan">[1]</a><a class="srcchip" href="https://careers.cpsenergy.com/job/San-Antonio-Mgr-General-Auditing-TX-78205/1384745700/" target="_blank" rel="noopener" title="CPS Energy Careers - Mgr General Auditing">[2]</a></td>
@@ -277,7 +298,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Florida Power &amp; Light Company</div><div class="op-parent">NextEra Energy, Inc. (NYSE: NEE)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=6 (harm surface)">6.2</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=6 (harm surface)">6.2</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Florida Power &amp; Light Company" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Florida Power &amp; Light Company" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Florida Power &amp; Light Company" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Florida Power &amp; Light Company" data-glyph="EVE | SF | SN | HHLR | Florida Power &amp; Light Company | Watch (mid-band)" data-trigger="HHLR re-evaluation of Florida Power &amp; Light Company" data-threshold="&lt; 6.4" data-observed="6.2 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Florida Power &amp; Light Company | Watch (mid-band)</div></div></td>
       <td class="ctry">United States<span class="hq">Juno Beach, Florida, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="St. Lucie Nuclear Plant — Units 1 and 2; Turkey Point Nuclear Plant — Units 3 and 4">2</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.investor.nexteraenergy.com" target="_blank" rel="noopener" title="NextEra Energy investor relations">[1]</a><a class="srcchip" href="https://www.investor.nexteraenergy.com/~/media/Files/N/NEE-IR/reports-and-fillings/quarterly-earnings/2026/Q1%202026/Q1%202026%20Earnings%20Script%20vF.pdf" target="_blank" rel="noopener" title="Q1 2026 earnings call transcript">[2]</a></td>
@@ -288,7 +309,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Tennessee Valley Authority (TVA)</div><div class="op-parent">Tennessee Valley Authority (federal public corporation; no stock ticker)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.2</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=7 (harm surface)">6.2</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Tennessee Valley Authority (TVA)" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Tennessee Valley Authority (TVA)" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Tennessee Valley Authority (TVA)" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Tennessee Valley Authority (TVA)" data-glyph="EVE | SF | SN | HHLR | Tennessee Valley Authority (TVA) | Watch (mid-band)" data-trigger="HHLR re-evaluation of Tennessee Valley Authority (TVA)" data-threshold="&lt; 6.4" data-observed="6.2 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Tennessee Valley Authority (TVA) | Watch (mid-band)</div></div></td>
       <td class="ctry">United States<span class="hq">Knoxville, Tennessee, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="Browns Ferry Nuclear Plant — Unit 1, Unit 2, Unit 3; Sequoyah Nuclear Plant — Unit 1, Unit 2; Watts Bar Nuclear Plant — Unit 1, Unit 2">3</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.sap.com/industries/utilities.html" target="_blank" rel="noopener" title="SAP Utilities Software">[1]</a></td>
@@ -299,7 +320,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">DTE Electric</div><div class="op-parent">DTE Energy Company (NYSE: DTE)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="DTE Electric" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="DTE Electric" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="DTE Electric" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="DTE Electric" data-glyph="EVE | SF | SN | HHLR | DTE Electric | Watch (mid-band)" data-trigger="HHLR re-evaluation of DTE Electric" data-threshold="&lt; 6.4" data-observed="6.0 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | DTE Electric | Watch (mid-band)</div></div></td>
       <td class="ctry">United States<span class="hq">Detroit, Michigan, USA</span></td>
       <td class="reactors"><span class="reactor-count" title="Fermi 2 (single unit); DTE’s public filings also note nuclear-facility ownership/operation risk, but I could not confirm additional operating reactor units in the time available.">2</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://ir.dteenergy.com/news/press-release-details/2026/DTE-Energy-reports-first-quarter-2026-accomplishments-investments-and-financial-results/default.aspx" target="_blank" rel="noopener" title="DTE Energy IR">[1]</a></td>
@@ -310,7 +331,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Ameren Missouri (Union Electric Company)</div><div class="op-parent">Ameren Corporation (NYSE: AEE)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Ameren Missouri (Union Electric Company)" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Ameren Missouri (Union Electric Company)" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Ameren Missouri (Union Electric Company)" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Ameren Missouri (Union Electric Company)" data-glyph="EVE | SF | SN | HHLR | Ameren Missouri (Union Electric Company) | Watch (mid-band)" data-trigger="HHLR re-evaluation of Ameren Missouri (Union Electric Company)" data-threshold="&lt; 6.4" data-observed="6.0 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Ameren Missouri (Union Electric Company) | Watch (mid-band)</div></div></td>
       <td class="ctry">United States<span class="hq">St. Louis, Missouri, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="Callaway Energy Center (1 unit, Callaway County, Missouri)">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.ameren.com/-/media/files/our-company/generation/callaway-fact-sheet.ashx" target="_blank" rel="noopener" title="Ameren Callaway Fact Sheet 2025">[1]</a><a class="srcchip" href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener" title="SAP Customer Stories">[2]</a></td>
@@ -321,7 +342,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Bruce Power</div><div class="op-parent">Canadian-owned partnership of TC Energy (TSX: TRP), OMERS, the Power Workers’ Union, and The Society of United Professionals</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=6 (harm surface)">6.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=6 (harm surface)">6.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Bruce Power" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Bruce Power" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Bruce Power" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Bruce Power" data-glyph="EVE | SF | SN | HHLR | Bruce Power | Watch (mid-band)" data-trigger="HHLR re-evaluation of Bruce Power" data-threshold="&lt; 6.4" data-observed="6.0 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Bruce Power | Watch (mid-band)</div></div></td>
       <td class="ctry">Canada<span class="hq">Kincardine, Ontario</span></td>
       <td class="reactors"><span class="reactor-count" title="Bruce Nuclear Generating Station: Units 1, 2, 3, 4, 5, 6, 7, and 8 (Bruce A: Units 1-4; Bruce B: Units 5-8)">2</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.brucepower.com" target="_blank" rel="noopener" title="Bruce Power">[1]</a><a class="srcchip" href="https://www.brucepower.com/publications/bruce-power-2025-annual-review-powering-the-future/" target="_blank" rel="noopener" title="Bruce Power 2025 Annual Review">[2]</a></td>
@@ -332,7 +353,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">American Electric Power (Indiana Michigan Power)</div><div class="op-parent">American Electric Power (Nasdaq: AEP)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=7 (lock-in) · A=6 (architecture) · G=5 (governance) · D=7 (decision opacity) · C=5 (harm surface)">6.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="American Electric Power (Indiana Michigan Power)" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="American Electric Power (Indiana Michigan Power)" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="American Electric Power (Indiana Michigan Power)" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="American Electric Power (Indiana Michigan Power)" data-glyph="EVE | SF | SN | HHLR | American Electric Power (Indiana Michigan Power) | Watch (mid-band)" data-trigger="HHLR re-evaluation of American Electric Power (Indiana Michigan Power)" data-threshold="&lt; 6.4" data-observed="6.0 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | American Electric Power (Indiana Michigan Power) | Watch (mid-band)</div></div></td>
       <td class="ctry">United States<span class="hq">Columbus, Ohio</span></td>
       <td class="reactors"><span class="reactor-count" title="D.C. Cook Nuclear Plant (Donald C. Cook), Units 1 and 2, Bridgman, Michigan">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://news.sap.com/2026/05/sap-sapphire-sap-unveils-autonomous-enterprise/" target="_blank" rel="noopener" title="SAP News">[1]</a></td>
@@ -343,7 +364,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Ontario Power Generation</div><div class="op-parent">Ontario provincial Crown corporation (no stock ticker)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=4 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=8 (harm surface)">5.8</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=4 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=8 (harm surface)">5.8</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Ontario Power Generation" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Ontario Power Generation" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Ontario Power Generation" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Ontario Power Generation" data-glyph="EVE | SF | SN | HHLR | Ontario Power Generation | Watch (mid-band)" data-trigger="HHLR re-evaluation of Ontario Power Generation" data-threshold="&lt; 6.4" data-observed="5.8 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Ontario Power Generation | Watch (mid-band)</div></div></td>
       <td class="ctry">Canada<span class="hq">Toronto, Ontario, Canada</span></td>
       <td class="reactors"><span class="reactor-count" title="Darlington Nuclear Generating Station: 4 units (Units 1-4); Pickering Nuclear Generating Station: 8 reactors (Units 5-8 operating; Units 1 and 4 shut down to safe storage; Units 2 and 3 in safe storage).">4</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://events.sap.com/eaa-learning-yyz/en_us/home.html" target="_blank" rel="noopener" title="SAP Enterprise Architect Day of Learning">[1]</a></td>
@@ -354,7 +375,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Energy Harbor LLC</div><div class="op-parent">Vistra Corp. (NYSE: VST)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-amber" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=7 (harm surface)">5.6</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-amber" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=7 (harm surface)">5.6</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Energy Harbor LLC" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Energy Harbor LLC" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Energy Harbor LLC" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Energy Harbor LLC" data-glyph="EVE | SF | SN | HHLR | Energy Harbor LLC | Watch (mid-band)" data-trigger="HHLR re-evaluation of Energy Harbor LLC" data-threshold="&lt; 6.4" data-observed="5.6 (Watch (mid-band))" data-corrective="Monitor (watch list)" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Energy Harbor LLC | Watch (mid-band)</div></div></td>
       <td class="ctry">United States<span class="hq">Akron, Ohio, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="Beaver Valley 1, Beaver Valley 2; Davis-Besse 1; Perry 1">3</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://hub.vistracorp.com/author/vistrahub/" target="_blank" rel="noopener" title="Vistra Completes Energy Harbor Acquisition">[1]</a></td>
@@ -365,7 +386,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Holtec International</div><div class="op-parent">Holtec International (private; no stock ticker public)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=6 (harm surface)">5.4</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=6 (harm surface)">5.4</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Holtec International" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Holtec International" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Holtec International" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Holtec International" data-glyph="EVE | SF | SN | HHLR | Holtec International | Stable" data-trigger="HHLR re-evaluation of Holtec International" data-threshold="&lt; 6.4" data-observed="5.4 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Holtec International | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Camden, New Jersey, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="Palisades Nuclear Plant — Unit 1; Pioneer 1 and Pioneer 2 are planned SMR-300 units at the Palisades site, but not yet operating. Holtec&#x27;s public pages do not clearly list additional commercial reactor units operated by Holtec as an operator.">2</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://news.sap.com" target="_blank" rel="noopener" title="SAP News Center">[1]</a><a class="srcchip" href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener" title="SAP Customer Stories">[2]</a></td>
@@ -376,7 +397,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Arizona Public Service (APS)</div><div class="op-parent">Pinnacle West Capital Corp. (NYSE: PNW)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=5 (harm surface)">5.2</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=5 (harm surface)">5.2</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Arizona Public Service (APS)" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Arizona Public Service (APS)" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Arizona Public Service (APS)" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Arizona Public Service (APS)" data-glyph="EVE | SF | SN | HHLR | Arizona Public Service (APS) | Stable" data-trigger="HHLR re-evaluation of Arizona Public Service (APS)" data-threshold="&lt; 6.4" data-observed="5.2 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Arizona Public Service (APS) | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Phoenix, Arizona, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="Palo Verde Generating Station — Units 1, 2, and 3">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.pinnaclewest.com/investors/reports/sec-filings/default.aspx" target="_blank" rel="noopener" title="Pinnacle West SEC Filings">[1]</a><a class="srcchip" href="https://careers.aps.com/go/Internship/8829300/" target="_blank" rel="noopener" title="APS Careers">[2]</a></td>
@@ -387,7 +408,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Vistra Corp. / Luminant</div><div class="op-parent">Vistra Corp. (NYSE: VST)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Vistra Corp. / Luminant" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Vistra Corp. / Luminant" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Vistra Corp. / Luminant" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Vistra Corp. / Luminant" data-glyph="EVE | SF | SN | HHLR | Vistra Corp. / Luminant | Stable" data-trigger="HHLR re-evaluation of Vistra Corp. / Luminant" data-threshold="&lt; 6.4" data-observed="5.0 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Vistra Corp. / Luminant | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Irving, Texas</span></td>
       <td class="reactors"><span class="reactor-count" title="Comanche Peak Nuclear Power Plant Units 1 and 2; Perry Nuclear Power Plant Unit 1; plus acquired Energy Harbor nuclear fleet, which Vistra describes as a 4,000-megawatt nuclear generation fleet and its second-largest competitive nuclear fleet in the country">3</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://vistracorp.com/about/leadership/" target="_blank" rel="noopener" title="Vistra leadership">[1]</a><a class="srcchip" href="https://investor.vistracorp.com/news?l=50" target="_blank" rel="noopener" title="Vistra investor news">[2]</a></td>
@@ -398,7 +419,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Energy Northwest</div><div class="op-parent">Energy Northwest (non-profit joint operating agency; no public ticker)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Energy Northwest" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Energy Northwest" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Energy Northwest" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Energy Northwest" data-glyph="EVE | SF | SN | HHLR | Energy Northwest | Stable" data-trigger="HHLR re-evaluation of Energy Northwest" data-threshold="&lt; 6.4" data-observed="5.0 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Energy Northwest | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Richland, Washington, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="Columbia Generating Station — 1 unit (BWR-5, 1,207 MWe net; nuclear only)">2</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.sap.com/industries/utilities.html" target="_blank" rel="noopener" title="SAP Energy &amp; Utilities">[1]</a></td>
@@ -409,7 +430,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Austin Energy</div><div class="op-parent">City of Austin (municipal utility; no public ticker)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Austin Energy" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Austin Energy" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Austin Energy" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Austin Energy" data-glyph="EVE | SF | SN | HHLR | Austin Energy | Stable" data-trigger="HHLR re-evaluation of Austin Energy" data-threshold="&lt; 6.4" data-observed="5.0 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Austin Energy | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Austin, Texas, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="South Texas Project (Bay City, TX) — co-owner of 16% of Units 1 and 2; STPNOC manages the plant">2</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://austinenergy.com/about/company-profile/executive-leadership-team" target="_blank" rel="noopener" title="Austin Energy Executive Leadership Team">[1]</a><a class="srcchip" href="https://austinenergy.com/about/company-profile/electric-system/power-plants" target="_blank" rel="noopener" title="Austin Energy Power Plants">[2]</a></td>
@@ -420,7 +441,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Nebraska Public Power District (NPPD)</div><div class="op-parent">Public power district; no parent company / no ticker</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Nebraska Public Power District (NPPD)" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Nebraska Public Power District (NPPD)" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Nebraska Public Power District (NPPD)" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Nebraska Public Power District (NPPD)" data-glyph="EVE | SF | SN | HHLR | Nebraska Public Power District (NPPD) | Stable" data-trigger="HHLR re-evaluation of Nebraska Public Power District (NPPD)" data-threshold="&lt; 6.4" data-observed="5.0 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Nebraska Public Power District (NPPD) | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Columbus, Nebraska</span></td>
       <td class="reactors"><span class="reactor-count" title="Cooper Nuclear Station (Brownville, Nebraska) — 1 reactor unit">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.nppd.com/newsroom/press-releases" target="_blank" rel="noopener" title="NPPD Press Releases">[1]</a></td>
@@ -431,7 +452,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">STP Nuclear Operating Company</div><div class="op-parent">Major owners: NRG Energy (NYSE: NRG), CPS Energy (public utility), City Public Service of San Antonio / also known as CPS Energy (public utility), and Austin Energy (public utility)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=4 (harm surface)">5.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="STP Nuclear Operating Company" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="STP Nuclear Operating Company" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="STP Nuclear Operating Company" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="STP Nuclear Operating Company" data-glyph="EVE | SF | SN | HHLR | STP Nuclear Operating Company | Stable" data-trigger="HHLR re-evaluation of STP Nuclear Operating Company" data-threshold="&lt; 6.4" data-observed="5.0 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | STP Nuclear Operating Company | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Bay City, Texas, United States</span></td>
       <td class="reactors"><span class="reactor-count" title="South Texas Project Electric Generating Station: Unit 1, Unit 2">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener" title="SAP Customer Stories">[1]</a></td>
@@ -442,7 +463,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Comisión Federal de Electricidad (CFE)</div><div class="op-parent">Comisión Federal de Electricidad (state-owned; no ticker)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=4 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=4 (harm surface)">5.0</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=4 (lock-in) · A=6 (architecture) · G=4 (governance) · D=7 (decision opacity) · C=4 (harm surface)">5.0</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Comisión Federal de Electricidad (CFE)" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Comisión Federal de Electricidad (CFE)" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Comisión Federal de Electricidad (CFE)" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Comisión Federal de Electricidad (CFE)" data-glyph="EVE | SF | SN | HHLR | Comisión Federal de Electricidad (CFE) | Stable" data-trigger="HHLR re-evaluation of Comisión Federal de Electricidad (CFE)" data-threshold="&lt; 6.4" data-observed="5.0 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Comisión Federal de Electricidad (CFE) | Stable</div></div></td>
       <td class="ctry">Mexico<span class="hq">Mexico City, Mexico</span></td>
       <td class="reactors"><span class="reactor-count" title="Central Nucleoeléctrica Laguna Verde (Veracruz) — Units 1 and 2">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.sap.com/about/customer-stories.html" target="_blank" rel="noopener" title="SAP customer stories page">[1]</a></td>
@@ -453,7 +474,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">Wolf Creek Nuclear Operating Corporation</div><div class="op-parent">Evergy, Inc. (NASDAQ: EVRG)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=3 (harm surface)">4.8</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=5 (governance) · D=5 (decision opacity) · C=3 (harm surface)">4.8</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="Wolf Creek Nuclear Operating Corporation" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="Wolf Creek Nuclear Operating Corporation" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="Wolf Creek Nuclear Operating Corporation" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="Wolf Creek Nuclear Operating Corporation" data-glyph="EVE | SF | SN | HHLR | Wolf Creek Nuclear Operating Corporation | Stable" data-trigger="HHLR re-evaluation of Wolf Creek Nuclear Operating Corporation" data-threshold="&lt; 6.4" data-observed="4.8 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | Wolf Creek Nuclear Operating Corporation | Stable</div></div></td>
       <td class="ctry">United States<span class="hq">Burlington, Kansas</span></td>
       <td class="reactors"><span class="reactor-count" title="Wolf Creek Generating Station — Unit 1 (single-unit pressurized water reactor)">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://investors.evergy.com/news-releases/news-release-details/evergy-announces-first-quarter-2026-results-announces-new-large" target="_blank" rel="noopener" title="Evergy Investor Relations">[1]</a></td>
@@ -464,7 +485,7 @@
     </tr>
     <tr>
       <td class="op"><div class="op-name">New Brunswick Power Corporation</div><div class="op-parent">New Brunswick Power Corporation (Crown corporation; no public ticker)</div></td>
-      <td class="hhlr-cell"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=4 (governance) · D=5 (decision opacity) · C=4 (harm surface)">4.8</span></td>
+      <td class="hhlr-cell"><div class="score-block"><span class="hhlr hhlr-green" title="L=5 (lock-in) · A=6 (architecture) · G=4 (governance) · D=5 (decision opacity) · C=4 (harm surface)">4.8</span><div class="score-btns"><button class="sbtn sbtn-yield" data-op="New Brunswick Power Corporation" data-action="yield" title="Tender Yield Clause offer">Yield</button><button class="sbtn sbtn-clone" data-op="New Brunswick Power Corporation" data-action="clone" title="Initiate full SAP estate clone">Clone</button><button class="sbtn sbtn-audit" data-op="New Brunswick Power Corporation" data-action="audit" title="Open SF/SN audit ledger">Audit</button><button class="sbtn sbtn-info" data-op="New Brunswick Power Corporation" data-glyph="EVE | SF | SN | HHLR | New Brunswick Power Corporation | Stable" data-trigger="HHLR re-evaluation of New Brunswick Power Corporation" data-threshold="&lt; 6.4" data-observed="4.8 (Stable)" data-corrective="No action; periodic re-score" title="Event condition + glyph">ⓘ</button></div><div class="glyph-line" title="Glyph reference">EVE | SF | SN | HHLR | New Brunswick Power Corporation | Stable</div></div></td>
       <td class="ctry">Canada<span class="hq">Fredericton, New Brunswick</span></td>
       <td class="reactors"><span class="reactor-count" title="Point Lepreau Nuclear Generating Station — 1 unit (Point Lepreau 1 / CANDU 6)">1</span></td>
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.nbpower.com/en/about-us/projects/renewables-integration-grid-security-rigs-project" target="_blank" rel="noopener" title="NB Power RIGS project page">[1]</a></td>
@@ -476,10 +497,31 @@
     </tbody>
   </table>
 
+  <!-- Event-condition modal -->
+  <div class="ec-modal" id="ecModal">
+    <div class="ec-card">
+      <button class="close" onclick="document.getElementById('ecModal').classList.remove('open')">×</button>
+      <h3 id="ecTitle">Event Condition</h3>
+      <dl>
+        <dt>Glyph</dt><dd id="ecGlyph" style="font-family:ui-monospace,Menlo,monospace"></dd>
+        <dt>Trigger</dt><dd id="ecTrigger"></dd>
+        <dt>Threshold</dt><dd id="ecThreshold"></dd>
+        <dt>Observed Value</dt><dd id="ecObserved"></dd>
+        <dt>Corrective Glyph</dt><dd id="ecCorrective"></dd>
+      </dl>
+      <p style="color:var(--muted);font-size:11px;margin-top:14px;border-top:1px solid var(--border);padding-top:10px;">
+        Per <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/blob/main/canon/SCORING-DISCIPLINE.md" target="_blank">Scoring Discipline canon</a>
+        (SIN-EVE-2026-0521-CANON-SCORE-DISC-08-001). Every score ships with buttons + glyph + event-condition details, or auto-classifies -6.
+      </p>
+    </div>
+  </div>
+
   <div class="footer">
     SIN-EVE-2026-0521-NUC-NASCAN-04-001 (scan) · SIN-EVE-2026-0521-CANON-HHLR-07-001 (framework) ·
     <a href="https://github.com/EVEglyphDesign/NA-Nuclear-Utilities" target="_blank">repo</a> ·
     <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/blob/main/canon/HHLR-FRAMEWORK.md" target="_blank">HHLR canon</a> ·
+    <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/blob/main/canon/SCORING-DISCIPLINE.md" target="_blank">Score-Discipline canon</a> ·
+    <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/tree/main/self-healing" target="_blank">Self-Healing ledger</a> ·
     pour le bien-être du peuple
   </div>
 
@@ -512,6 +554,31 @@
   }
   [inp, dep, ctry, si].forEach(el => el.addEventListener('input', apply));
   encOnly.addEventListener('change', apply);
+
+  // Score-discipline event-condition modal
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.sbtn');
+    if (!b) return;
+    if (b.classList.contains('sbtn-info')) {
+      document.getElementById('ecTitle').textContent = 'Event Condition — ' + b.dataset.op;
+      document.getElementById('ecGlyph').textContent = b.dataset.glyph || '';
+      document.getElementById('ecTrigger').textContent = b.dataset.trigger || '';
+      document.getElementById('ecThreshold').textContent = b.dataset.threshold || '';
+      document.getElementById('ecObserved').textContent = b.dataset.observed || '';
+      document.getElementById('ecCorrective').textContent = b.dataset.corrective || '';
+      document.getElementById('ecModal').classList.add('open');
+    } else {
+      const action = b.dataset.action;
+      const op = b.dataset.op;
+      alert(`${action.toUpperCase()} action queued for ${op}.
+
+Per Non-Restriction Doctrine, this would tender the four-pillar offer.
+(Mock action — wire to backend in production.)`);
+    }
+  });
+  document.getElementById('ecModal').addEventListener('click', e => {
+    if (e.target.id === 'ecModal') e.target.classList.remove('open');
+  });
 
   let sortCol = 1, sortAsc = false;  // default: HHLR descending
   document.querySelectorAll('#tbl thead th').forEach((th, i) => {
