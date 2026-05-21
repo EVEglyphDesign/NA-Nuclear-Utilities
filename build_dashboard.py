@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""Build interactive HTML dashboard from the NA nuclear utilities CSV."""
+"""Build interactive HTML dashboard from the NA nuclear utilities CSV.
+
+Design goals (revision 2 — "wasted space" fix):
+- Full-bleed: zero side margins, dashboard fills viewport edge-to-edge.
+- Dense single-row layout: each operator = 1 table row, no internal stacking.
+- Larger, higher-contrast body type for readability (14px+, brighter muted color).
+- Summary as a compact horizontal strip, not three big cards.
+- Reactor sites + sources collapsed behind hover/expand to free horizontal space.
+- Executives merged into one column (CIO/CTO/CFO chips).
+- Plain text for "Unknown" — no badge noise. Only positive states get colored badges.
+"""
 import csv
 import html
 import json
@@ -12,118 +22,182 @@ HTML_PATH = Path("/home/user/workspace/NA-Nuclear-Utilities/index.html")
 MD_LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
 
-def md_to_html(text: str) -> str:
-    """Convert markdown links to HTML anchor tags. Escape everything else."""
-    if not text or text.strip().lower() in ("unknown", ""):
-        return '<span class="muted">—</span>'
-    parts = []
-    last = 0
+def md_to_links(text: str):
+    """Return list of (label, url) tuples extracted from markdown link text."""
+    if not text:
+        return []
+    out = []
     for m in MD_LINK_RE.finditer(text):
-        parts.append(html.escape(text[last:m.start()]))
-        label = html.escape(m.group(1))
-        url = html.escape(m.group(2), quote=True)
-        parts.append(f'<a href="{url}" target="_blank" rel="noopener">{label}</a>')
-        last = m.end()
-    parts.append(html.escape(text[last:]))
-    return "".join(parts) or '<span class="muted">—</span>'
+        out.append((m.group(1).strip(), m.group(2).strip()))
+    return out
 
 
-def linkify_url(url: str, label: str = None) -> str:
-    if not url or url.strip().lower() in ("unknown", ""):
-        return '<span class="muted">—</span>'
-    if url.startswith("http"):
-        safe = html.escape(url, quote=True)
-        return f'<a href="{safe}" target="_blank" rel="noopener">{html.escape(label or url)}</a>'
-    return html.escape(url)
+def render_source_links(text: str) -> str:
+    """Render markdown links as compact superscript-style numbered footnote chips."""
+    links = md_to_links(text)
+    if not links:
+        return ""
+    chips = []
+    for i, (label, url) in enumerate(links, 1):
+        safe_url = html.escape(url, quote=True)
+        safe_label = html.escape(label)
+        chips.append(
+            f'<a class="srcchip" href="{safe_url}" target="_blank" rel="noopener" title="{safe_label}">[{i}]</a>'
+        )
+    return " " + "".join(chips)
 
 
-def deployment_badge(value: str) -> str:
+def deployment_cell(value: str, source_md: str) -> str:
     v = (value or "").strip()
     vl = v.lower()
-    cls = "badge-unknown"
-    if "public cloud" in vl or "grow" in vl:
-        cls = "badge-grow"
+    if vl in ("", "unknown"):
+        label, cls = "Unknown", "tag-unknown"
+    elif "public cloud" in vl or "grow" in vl:
+        label, cls = "S/4 Public (GROW)", "tag-grow"
     elif "private cloud" in vl or "rise" in vl:
-        cls = "badge-rise"
+        label, cls = "S/4 Private (RISE)", "tag-rise"
     elif "on-prem s/4" in vl or "on-prem s4" in vl:
-        cls = "badge-s4onprem"
-    elif "on-prem ecc" in vl or "ecc" in vl:
-        cls = "badge-ecc"
-    elif vl in ("", "unknown"):
-        v = "Unknown"
-    return f'<span class="badge {cls}">{html.escape(v or "Unknown")}</span>'
+        label, cls = "On-Prem S/4", "tag-s4onprem"
+    elif "ecc" in vl:
+        label, cls = "On-Prem ECC", "tag-ecc"
+    else:
+        label, cls = v, "tag-unknown"
+    src = render_source_links(source_md)
+    return f'<span class="tag {cls}">{html.escape(label)}</span>{src}'
 
 
-def signed_badge(value: str) -> str:
+def signed_cell(value: str) -> str:
     v = (value or "").strip()
     vl = v.lower()
-    cls = "badge-unknown"
-    if vl.startswith("yes - live") or "live on s/4" in vl:
-        cls = "badge-live"
-    elif vl.startswith("yes"):
-        cls = "badge-signed"
-    elif "transition" in vl:
-        cls = "badge-transition"
-    elif vl.startswith("no") or "still on ecc" in vl:
-        cls = "badge-no"
-    return f'<span class="badge {cls}">{html.escape(v or "Unknown")}</span>'
+    if vl in ("", "unknown"):
+        return '<span class="muted">—</span>'
+    if "live" in vl:
+        return '<span class="tag tag-live">Live</span>'
+    if "transition" in vl:
+        return '<span class="tag tag-transition">Transition</span>'
+    if vl.startswith("yes"):
+        return '<span class="tag tag-signed">Signed</span>'
+    if vl.startswith("no") or "still on ecc" in vl:
+        return '<span class="tag tag-no">No</span>'
+    return f'<span class="muted">{html.escape(v)}</span>'
 
 
+def exec_chip(role: str, name: str, linkedin_url: str) -> str:
+    """Tight one-liner: role label + name + LinkedIn icon, or '—' if unknown."""
+    n = (name or "").strip()
+    if not n or n.lower() == "unknown":
+        return f'<span class="exec"><span class="role">{role}</span><span class="muted">—</span></span>'
+    li = ""
+    if linkedin_url and linkedin_url.startswith("http"):
+        safe = html.escape(linkedin_url, quote=True)
+        li = f' <a class="lilink" href="{safe}" target="_blank" rel="noopener" title="LinkedIn">in</a>'
+    return f'<span class="exec"><span class="role">{role}</span>{html.escape(n)}{li}</span>'
+
+
+def csat_cell(rating: str, source_md: str) -> str:
+    r = (rating or "").strip()
+    if not r or r.lower() == "unknown":
+        return '<span class="muted">—</span>'
+    src = render_source_links(source_md)
+    # Truncate long ratings; full text visible on hover
+    short = r if len(r) <= 90 else r[:87] + "…"
+    return f'<span title="{html.escape(r)}">{html.escape(short)}</span>{src}'
+
+
+def reactor_cell(text: str) -> str:
+    t = (text or "").strip()
+    if not t:
+        return '<span class="muted">—</span>'
+    # Count sites by splitting on ';'
+    sites = [s.strip() for s in t.split(";") if s.strip()]
+    n = len(sites)
+    return f'<span class="reactor-count" title="{html.escape(t)}">{n} site{"s" if n != 1 else ""}</span>'
+
+
+# Load CSV
 rows = []
 with open(CSV_PATH, newline="", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     for r in reader:
         rows.append(r)
 
-# Compute summary counts
 total = len(rows)
-deploy_counts = {"On-Prem ECC": 0, "On-Prem S/4": 0, "S/4 Private Cloud (RISE)": 0, "S/4 Public Cloud (GROW)": 0, "Unknown": 0}
-signed_counts = {"Live": 0, "Signed": 0, "In transition": 0, "No / Still on ECC": 0, "Unknown": 0}
+
+# Summary counts
+deploy_counts = {"On-Prem ECC": 0, "On-Prem S/4": 0, "S/4 Private (RISE)": 0, "S/4 Public (GROW)": 0, "Unknown": 0}
+signed_counts = {"Live": 0, "Signed": 0, "Transition": 0, "No": 0, "Unknown": 0}
 country_counts = {}
+
+DEPLOY_KEY = "SAP Deployment Class (On-Prem ECC / On-Prem S/4 / S/4 Private Cloud (RISE) / S/4 Public Cloud (GROW) / Unknown)"
+SIGNED_KEY = "Signed for S/4? (Yes-Signed / Yes-Live / In transition / No / Unknown)"
+
 for r in rows:
-    d = (r.get("SAP Deployment Class (On-Prem ECC / On-Prem S/4 / S/4 Private Cloud (RISE) / S/4 Public Cloud (GROW) / Unknown)") or "").lower()
+    d = (r.get(DEPLOY_KEY) or "").lower()
     if "public cloud" in d or "grow" in d:
-        deploy_counts["S/4 Public Cloud (GROW)"] += 1
+        deploy_counts["S/4 Public (GROW)"] += 1
     elif "private cloud" in d or "rise" in d:
-        deploy_counts["S/4 Private Cloud (RISE)"] += 1
+        deploy_counts["S/4 Private (RISE)"] += 1
     elif "on-prem s/4" in d or "on-prem s4" in d:
         deploy_counts["On-Prem S/4"] += 1
     elif "ecc" in d:
         deploy_counts["On-Prem ECC"] += 1
     else:
         deploy_counts["Unknown"] += 1
-    s = (r.get("Signed for S/4? (Yes-Signed / Yes-Live / In transition / No / Unknown)") or "").lower()
+
+    s = (r.get(SIGNED_KEY) or "").lower()
     if "live" in s:
         signed_counts["Live"] += 1
+    elif "transition" in s:
+        signed_counts["Transition"] += 1
     elif s.startswith("yes"):
         signed_counts["Signed"] += 1
-    elif "transition" in s:
-        signed_counts["In transition"] += 1
     elif s.startswith("no") or "still on ecc" in s:
-        signed_counts["No / Still on ECC"] += 1
+        signed_counts["No"] += 1
     else:
         signed_counts["Unknown"] += 1
+
     c = r.get("Country", "Unknown")
     country_counts[c] = country_counts.get(c, 0) + 1
 
 
 def render_row(r):
-    return f"""
-    <tr>
-      <td class="op">{html.escape(r.get('Operator',''))}<div class="parent">{html.escape(r.get('Parent / Ticker',''))}</div></td>
-      <td>{html.escape(r.get('Country',''))}<div class="muted small">{html.escape(r.get('HQ',''))}</div></td>
-      <td class="reactors">{html.escape(r.get('Reactor Sites',''))}</td>
-      <td>{deployment_badge(r.get('SAP Deployment Class (On-Prem ECC / On-Prem S/4 / S/4 Private Cloud (RISE) / S/4 Public Cloud (GROW) / Unknown)'))}<div class="src">{md_to_html(r.get('SAP Source URL (markdown link)',''))}</div></td>
-      <td>{signed_badge(r.get('Signed for S/4? (Yes-Signed / Yes-Live / In transition / No / Unknown)'))}</td>
-      <td>{html.escape(r.get('CIO Name','') or '—')}<div class="li">{linkify_url(r.get('CIO LinkedIn URL',''), 'LinkedIn')}</div></td>
-      <td>{html.escape(r.get('CTO Name','') or '—')}<div class="li">{linkify_url(r.get('CTO LinkedIn URL',''), 'LinkedIn')}</div></td>
-      <td>{html.escape(r.get('CFO Name','') or '—')}<div class="li">{linkify_url(r.get('CFO LinkedIn URL',''), 'LinkedIn')}</div></td>
-      <td>{html.escape(r.get('CSAT Rating / Score','') or '—')}<div class="src">{md_to_html(r.get('CSAT Source URL (markdown link to J.D. Power, ACSI, regulator, etc.)',''))}</div></td>
-    </tr>
-    """
+    op = html.escape(r.get("Operator", ""))
+    parent = html.escape(r.get("Parent / Ticker", ""))
+    country = html.escape(r.get("Country", ""))
+    hq = html.escape(r.get("HQ", ""))
+    reactors = reactor_cell(r.get("Reactor Sites", ""))
+    deploy = deployment_cell(r.get(DEPLOY_KEY, ""), r.get("SAP Source URL (markdown link)", ""))
+    signed = signed_cell(r.get(SIGNED_KEY, ""))
+    cio = exec_chip("CIO", r.get("CIO Name", ""), r.get("CIO LinkedIn URL", ""))
+    cto = exec_chip("CTO", r.get("CTO Name", ""), r.get("CTO LinkedIn URL", ""))
+    cfo = exec_chip("CFO", r.get("CFO Name", ""), r.get("CFO LinkedIn URL", ""))
+    csat = csat_cell(
+        r.get("CSAT Rating / Score", ""),
+        r.get("CSAT Source URL (markdown link to J.D. Power, ACSI, regulator, etc.)", ""),
+    )
+    return f"""    <tr>
+      <td class="op">
+        <div class="op-name">{op}</div>
+        <div class="op-parent">{parent}</div>
+      </td>
+      <td class="ctry">{country}<span class="hq">{hq}</span></td>
+      <td class="reactors">{reactors}</td>
+      <td class="deploy">{deploy}</td>
+      <td class="signed">{signed}</td>
+      <td class="execs">{cio}{cto}{cfo}</td>
+      <td class="csat">{csat}</td>
+    </tr>"""
 
 
 table_rows = "\n".join(render_row(r) for r in rows)
+
+
+def summary_pills(d):
+    return "".join(
+        f'<span class="pill"><span class="pill-k">{html.escape(k)}</span><span class="pill-v">{v}</span></span>'
+        for k, v in d.items()
+    )
+
 
 html_doc = f"""<!doctype html>
 <html lang="en">
@@ -133,80 +207,154 @@ html_doc = f"""<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
   :root {{
-    --bg:#0b1320; --panel:#111a2e; --border:#1f2a44; --text:#e6edf7; --muted:#8aa0c2;
-    --accent:#7cc4ff; --grow:#22c55e; --rise:#3b82f6; --s4onprem:#a78bfa; --ecc:#f59e0b;
-    --live:#10b981; --signed:#3b82f6; --transition:#f59e0b; --no:#ef4444; --unknown:#64748b;
+    --bg:#0a0f1c; --panel:#121a2c; --panel-2:#0e1626; --border:#243352;
+    --text:#f0f4fb; --muted:#a8b8d4; --accent:#7cc4ff;
   }}
   * {{ box-sizing:border-box; }}
-  body {{ font-family:-apple-system,Segoe UI,Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); margin:0; padding:24px; }}
-  h1 {{ font-size:22px; margin:0 0 4px; }}
-  .sub {{ color:var(--muted); font-size:13px; margin-bottom:18px; }}
-  .controls {{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }}
-  .controls input, .controls select {{
-    background:var(--panel); border:1px solid var(--border); color:var(--text);
-    padding:8px 10px; border-radius:6px; font-size:13px;
-  }}
-  .controls input {{ flex:1; min-width:240px; }}
-  .summary {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:18px; }}
-  .card {{ background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }}
-  .card .label {{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }}
-  .card .row {{ display:flex; justify-content:space-between; font-size:13px; padding:3px 0; }}
-  table {{ width:100%; border-collapse:separate; border-spacing:0; background:var(--panel); border:1px solid var(--border); border-radius:8px; overflow:hidden; }}
-  th {{ background:#0e1729; color:var(--muted); text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 12px; border-bottom:1px solid var(--border); cursor:pointer; user-select:none; }}
-  th:hover {{ color:var(--text); }}
-  td {{ padding:12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:top; }}
-  tr:last-child td {{ border-bottom:none; }}
-  td.op {{ font-weight:600; min-width:180px; }}
-  td .parent, td .src, td .li, td .small {{ color:var(--muted); font-size:11px; margin-top:2px; }}
-  td.reactors {{ max-width:260px; color:#c5d3eb; font-size:12px; }}
-  .muted {{ color:var(--muted); }}
+  html, body {{ margin:0; padding:0; background:var(--bg); color:var(--text); }}
+  body {{ font-family:-apple-system,Segoe UI,Inter,system-ui,sans-serif; font-size:14px; line-height:1.4; }}
   a {{ color:var(--accent); text-decoration:none; }}
   a:hover {{ text-decoration:underline; }}
-  .badge {{ display:inline-block; padding:3px 8px; border-radius:11px; font-size:11px; font-weight:600; white-space:nowrap; }}
-  .badge-grow {{ background:rgba(34,197,94,.15); color:#4ade80; border:1px solid rgba(34,197,94,.35); }}
-  .badge-rise {{ background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.35); }}
-  .badge-s4onprem {{ background:rgba(167,139,250,.15); color:#c4b5fd; border:1px solid rgba(167,139,250,.35); }}
-  .badge-ecc {{ background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.35); }}
-  .badge-live {{ background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.35); }}
-  .badge-signed {{ background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.35); }}
-  .badge-transition {{ background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.35); }}
-  .badge-no {{ background:rgba(239,68,68,.15); color:#f87171; border:1px solid rgba(239,68,68,.35); }}
-  .badge-unknown {{ background:rgba(100,116,139,.2); color:#94a3b8; border:1px solid rgba(100,116,139,.4); }}
-  .footer {{ margin-top:24px; padding-top:16px; border-top:1px solid var(--border); color:var(--muted); font-size:12px; text-align:center; font-style:italic; }}
+  .muted {{ color:var(--muted); }}
+
+  /* Top bar — single horizontal strip, no wasted space */
+  .bar {{
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    padding:10px 16px; background:var(--panel-2); border-bottom:1px solid var(--border);
+  }}
+  .bar h1 {{ font-size:15px; font-weight:600; margin:0; white-space:nowrap; }}
+  .bar .count {{ color:var(--muted); font-size:13px; }}
+  .pills {{ display:flex; gap:6px; flex-wrap:wrap; flex:1; justify-content:flex-end; }}
+  .pill {{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:3px 10px; font-size:12px;
+  }}
+  .pill-k {{ color:var(--muted); }}
+  .pill-v {{ font-weight:600; color:var(--text); }}
+
+  /* Controls row */
+  .controls {{
+    display:flex; gap:8px; padding:8px 16px; background:var(--panel-2);
+    border-bottom:1px solid var(--border); align-items:center; flex-wrap:wrap;
+  }}
+  .controls input, .controls select {{
+    background:var(--panel); border:1px solid var(--border); color:var(--text);
+    padding:6px 10px; border-radius:5px; font-size:13px; font-family:inherit;
+  }}
+  .controls input {{ flex:1; min-width:200px; }}
+  .controls input::placeholder {{ color:var(--muted); }}
+
+  /* Table — edge-to-edge */
+  table {{ width:100%; border-collapse:collapse; }}
+  thead th {{
+    background:var(--panel-2); color:var(--muted);
+    text-align:left; font-size:11px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.06em;
+    padding:8px 12px; border-bottom:1px solid var(--border);
+    cursor:pointer; user-select:none; position:sticky; top:0; z-index:1;
+  }}
+  thead th:hover {{ color:var(--text); }}
+  tbody td {{
+    padding:10px 12px; border-bottom:1px solid var(--border);
+    vertical-align:middle;
+  }}
+  tbody tr:hover {{ background:rgba(124,196,255,0.04); }}
+
+  /* Column styling */
+  td.op {{ min-width:220px; }}
+  .op-name {{ font-weight:600; font-size:14px; color:var(--text); }}
+  .op-parent {{ color:var(--muted); font-size:12px; margin-top:1px; }}
+  td.ctry {{ white-space:nowrap; font-size:13px; }}
+  td.ctry .hq {{ display:block; color:var(--muted); font-size:11px; }}
+  td.reactors {{ white-space:nowrap; }}
+  .reactor-count {{ color:var(--text); font-variant-numeric:tabular-nums; cursor:help; border-bottom:1px dotted var(--muted); }}
+
+  /* Tags / badges */
+  .tag {{
+    display:inline-block; padding:2px 8px; border-radius:4px;
+    font-size:12px; font-weight:600; white-space:nowrap;
+  }}
+  .tag-grow {{ background:rgba(34,197,94,.18); color:#5ee08e; }}
+  .tag-rise {{ background:rgba(59,130,246,.18); color:#7eb1ff; }}
+  .tag-s4onprem {{ background:rgba(167,139,250,.18); color:#c4b5fd; }}
+  .tag-ecc {{ background:rgba(245,158,11,.18); color:#fbbf24; }}
+  .tag-live {{ background:rgba(16,185,129,.18); color:#34d399; }}
+  .tag-signed {{ background:rgba(59,130,246,.18); color:#7eb1ff; }}
+  .tag-transition {{ background:rgba(245,158,11,.18); color:#fbbf24; }}
+  .tag-no {{ background:rgba(239,68,68,.18); color:#fca5a5; }}
+  .tag-unknown {{ color:var(--muted); font-weight:500; padding:0; background:none; }}
+
+  /* Execs column — three lines stacked */
+  td.execs {{ min-width:240px; line-height:1.5; }}
+  .exec {{ display:block; font-size:13px; white-space:nowrap; }}
+  .exec .role {{
+    display:inline-block; width:32px; color:var(--muted);
+    font-size:11px; font-weight:600;
+  }}
+  .lilink {{
+    display:inline-block; width:16px; height:16px; line-height:16px;
+    text-align:center; background:#0a66c2; color:#fff !important;
+    border-radius:3px; font-size:10px; font-weight:700;
+    margin-left:6px; text-decoration:none;
+  }}
+  .lilink:hover {{ background:#0958a8; text-decoration:none; }}
+
+  /* CSAT column */
+  td.csat {{ max-width:340px; font-size:13px; }}
+
+  /* Source link chips */
+  .srcchip {{
+    display:inline-block; margin-left:3px; padding:1px 5px;
+    background:var(--panel); border:1px solid var(--border); border-radius:3px;
+    font-size:10px; color:var(--accent); font-weight:600;
+  }}
+  .srcchip:hover {{ background:var(--border); text-decoration:none; }}
+
+  /* Footer */
+  .footer {{
+    padding:12px 16px; color:var(--muted); font-size:12px;
+    text-align:center; font-style:italic; border-top:1px solid var(--border);
+  }}
+  .footer a {{ color:var(--muted); }}
 </style>
 </head>
 <body>
-  <h1>North American Nuclear Utilities — SAP Landscape</h1>
-  <div class="sub">{total} parent operators across the United States, Canada, and Mexico. Compiled {("filed via SF/SN registry").replace("filed", "filed").strip()}. Click column headers to sort. Click any link to open the underlying public source.</div>
-
-  <div class="summary">
-    <div class="card">
-      <div class="label">Deployment Class</div>
-      {''.join(f'<div class="row"><span>{html.escape(k)}</span><span>{v}</span></div>' for k,v in deploy_counts.items())}
+  <div class="bar">
+    <h1>NA Nuclear Utilities — SAP Landscape</h1>
+    <span class="count">{total} operators · US + Canada + Mexico</span>
+    <div class="pills">
+      {summary_pills(deploy_counts)}
     </div>
-    <div class="card">
-      <div class="label">S/4 Status</div>
-      {''.join(f'<div class="row"><span>{html.escape(k)}</span><span>{v}</span></div>' for k,v in signed_counts.items())}
-    </div>
-    <div class="card">
-      <div class="label">Country</div>
-      {''.join(f'<div class="row"><span>{html.escape(k)}</span><span>{v}</span></div>' for k,v in country_counts.items())}
+  </div>
+  <div class="bar" style="border-top:none;">
+    <span class="count" style="font-weight:600;color:var(--text);">S/4 Status</span>
+    <div class="pills">
+      {summary_pills(signed_counts)}
     </div>
   </div>
 
   <div class="controls">
-    <input id="filter" placeholder="Filter: operator, country, executive, reactor site…" />
+    <input id="filter" placeholder="Filter operators, executives, reactor sites, country…" />
     <select id="deployFilter">
       <option value="">All deployments</option>
       <option>On-Prem ECC</option>
       <option>On-Prem S/4</option>
-      <option>S/4 Private Cloud (RISE)</option>
-      <option>S/4 Public Cloud (GROW)</option>
+      <option>S/4 Private (RISE)</option>
+      <option>S/4 Public (GROW)</option>
       <option>Unknown</option>
     </select>
     <select id="countryFilter">
       <option value="">All countries</option>
       {''.join(f'<option>{html.escape(c)}</option>' for c in sorted(country_counts.keys()))}
+    </select>
+    <select id="signedFilter">
+      <option value="">All S/4 status</option>
+      <option>Live</option>
+      <option>Signed</option>
+      <option>Transition</option>
+      <option>No</option>
+      <option>Unknown</option>
     </select>
   </div>
 
@@ -214,46 +362,56 @@ html_doc = f"""<!doctype html>
     <thead>
       <tr>
         <th data-col="0">Operator</th>
-        <th data-col="1">Country / HQ</th>
-        <th data-col="2">Reactor Sites</th>
+        <th data-col="1">Country</th>
+        <th data-col="2">Reactors</th>
         <th data-col="3">SAP Deployment</th>
-        <th data-col="4">Signed for S/4</th>
-        <th data-col="5">CIO</th>
-        <th data-col="6">CTO</th>
-        <th data-col="7">CFO</th>
-        <th data-col="8">Customer Satisfaction</th>
+        <th data-col="4">S/4</th>
+        <th data-col="5">Leadership</th>
+        <th data-col="6">Customer Satisfaction</th>
       </tr>
     </thead>
     <tbody>
-      {table_rows}
+{table_rows}
     </tbody>
   </table>
 
-  <div class="footer">SIN-EVE-2026-0521-NUC-NASCAN-04-001 · SF/SN incident registry, EVE Glyph Design · pour le bien-être du peuple</div>
+  <div class="footer">
+    SIN-EVE-2026-0521-NUC-NASCAN-04-001 ·
+    <a href="https://github.com/EVEglyphDesign/NA-Nuclear-Utilities" target="_blank">repo</a> ·
+    <a href="https://github.com/EVEglyphDesign/SF-SN-Registry/blob/main/registry/2026/0521/SIN-EVE-2026-0521-NUC-NASCAN-04-001.md" target="_blank">SF/SN registry</a> ·
+    pour le bien-être du peuple
+  </div>
 
 <script>
   const inp = document.getElementById('filter');
   const dep = document.getElementById('deployFilter');
   const ctry = document.getElementById('countryFilter');
+  const sgn = document.getElementById('signedFilter');
   const rows = Array.from(document.querySelectorAll('#tbl tbody tr'));
   function apply() {{
     const q = inp.value.toLowerCase();
     const d = dep.value.toLowerCase();
     const c = ctry.value.toLowerCase();
+    const s = sgn.value.toLowerCase();
     rows.forEach(r => {{
       const txt = r.textContent.toLowerCase();
-      let show = (!q || txt.includes(q)) && (!c || (r.children[1].textContent.toLowerCase().includes(c)));
+      let show = !q || txt.includes(q);
+      if (show && c) show = r.children[1].textContent.toLowerCase().includes(c);
       if (show && d) {{
-        const dep = r.children[3].textContent.toLowerCase();
-        if (d === 'unknown') show = dep.includes('unknown');
-        else show = dep.includes(d);
+        const depTxt = r.children[3].textContent.toLowerCase();
+        if (d === 'unknown') show = depTxt.includes('unknown');
+        else show = depTxt.includes(d);
+      }}
+      if (show && s) {{
+        const sTxt = r.children[4].textContent.toLowerCase();
+        if (s === 'unknown') show = sTxt.includes('—') || sTxt.includes('unknown');
+        else show = sTxt.includes(s);
       }}
       r.style.display = show ? '' : 'none';
     }});
   }}
-  [inp, dep, ctry].forEach(el => el.addEventListener('input', apply));
+  [inp, dep, ctry, sgn].forEach(el => el.addEventListener('input', apply));
 
-  // Click-to-sort
   let sortCol = -1, sortAsc = true;
   document.querySelectorAll('#tbl thead th').forEach((th, i) => {{
     th.addEventListener('click', () => {{
