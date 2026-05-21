@@ -100,7 +100,7 @@ def csat_cell(rating: str, source_md: str) -> str:
         return '<span class="muted">—</span>'
     src = render_source_links(source_md)
     # Truncate long ratings; full text visible on hover
-    short = r if len(r) <= 90 else r[:87] + "…"
+    short = r if len(r) <= 180 else r[:177] + "…"
     return f'<span title="{html.escape(r)}">{html.escape(short)}</span>{src}'
 
 
@@ -246,7 +246,14 @@ html_doc = f"""<!doctype html>
   .controls input::placeholder {{ color:var(--muted); }}
 
   /* Table — edge-to-edge */
-  table {{ width:100%; border-collapse:collapse; }}
+  table {{ width:100%; border-collapse:collapse; table-layout:fixed; }}
+  col.c-op {{ width:18%; }}
+  col.c-ctry {{ width:11%; }}
+  col.c-reactors {{ width:6%; }}
+  col.c-deploy {{ width:11%; }}
+  col.c-signed {{ width:6%; }}
+  col.c-execs {{ width:19%; }}
+  col.c-csat {{ width:29%; }}
   thead th {{
     background:var(--panel-2); color:var(--muted);
     text-align:left; font-size:11px; font-weight:600;
@@ -262,12 +269,11 @@ html_doc = f"""<!doctype html>
   tbody tr:hover {{ background:rgba(124,196,255,0.04); }}
 
   /* Column styling */
-  td.op {{ min-width:220px; }}
-  .op-name {{ font-weight:600; font-size:14px; color:var(--text); }}
-  .op-parent {{ color:var(--muted); font-size:12px; margin-top:1px; }}
-  td.ctry {{ white-space:nowrap; font-size:13px; }}
+  td.op .op-name {{ font-weight:600; font-size:14px; color:var(--text); word-wrap:break-word; }}
+  td.op .op-parent {{ color:var(--muted); font-size:12px; margin-top:1px; word-wrap:break-word; }}
+  td.ctry {{ font-size:13px; word-wrap:break-word; }}
   td.ctry .hq {{ display:block; color:var(--muted); font-size:11px; }}
-  td.reactors {{ white-space:nowrap; }}
+  td.reactors {{ white-space:nowrap; text-align:center; }}
   .reactor-count {{ color:var(--text); font-variant-numeric:tabular-nums; cursor:help; border-bottom:1px dotted var(--muted); }}
 
   /* Tags / badges */
@@ -286,8 +292,8 @@ html_doc = f"""<!doctype html>
   .tag-unknown {{ color:var(--muted); font-weight:500; padding:0; background:none; }}
 
   /* Execs column — three lines stacked */
-  td.execs {{ min-width:240px; line-height:1.5; }}
-  .exec {{ display:block; font-size:13px; white-space:nowrap; }}
+  td.execs {{ line-height:1.5; }}
+  .exec {{ display:block; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
   .exec .role {{
     display:inline-block; width:32px; color:var(--muted);
     font-size:11px; font-weight:600;
@@ -301,7 +307,8 @@ html_doc = f"""<!doctype html>
   .lilink:hover {{ background:#0958a8; text-decoration:none; }}
 
   /* CSAT column */
-  td.csat {{ max-width:340px; font-size:13px; }}
+  td.csat {{ font-size:13px; word-wrap:break-word; line-height:1.45; }}
+  td.deploy {{ word-wrap:break-word; }}
 
   /* Source link chips */
   .srcchip {{
@@ -359,6 +366,15 @@ html_doc = f"""<!doctype html>
   </div>
 
   <table id="tbl">
+    <colgroup>
+      <col class="c-op">
+      <col class="c-ctry">
+      <col class="c-reactors">
+      <col class="c-deploy">
+      <col class="c-signed">
+      <col class="c-execs">
+      <col class="c-csat">
+    </colgroup>
     <thead>
       <tr>
         <th data-col="0">Operator</th>

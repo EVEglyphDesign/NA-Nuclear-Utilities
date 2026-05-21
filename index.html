@@ -45,7 +45,14 @@
   .controls input::placeholder { color:var(--muted); }
 
   /* Table — edge-to-edge */
-  table { width:100%; border-collapse:collapse; }
+  table { width:100%; border-collapse:collapse; table-layout:fixed; }
+  col.c-op { width:18%; }
+  col.c-ctry { width:11%; }
+  col.c-reactors { width:6%; }
+  col.c-deploy { width:11%; }
+  col.c-signed { width:6%; }
+  col.c-execs { width:19%; }
+  col.c-csat { width:29%; }
   thead th {
     background:var(--panel-2); color:var(--muted);
     text-align:left; font-size:11px; font-weight:600;
@@ -61,12 +68,11 @@
   tbody tr:hover { background:rgba(124,196,255,0.04); }
 
   /* Column styling */
-  td.op { min-width:220px; }
-  .op-name { font-weight:600; font-size:14px; color:var(--text); }
-  .op-parent { color:var(--muted); font-size:12px; margin-top:1px; }
-  td.ctry { white-space:nowrap; font-size:13px; }
+  td.op .op-name { font-weight:600; font-size:14px; color:var(--text); word-wrap:break-word; }
+  td.op .op-parent { color:var(--muted); font-size:12px; margin-top:1px; word-wrap:break-word; }
+  td.ctry { font-size:13px; word-wrap:break-word; }
   td.ctry .hq { display:block; color:var(--muted); font-size:11px; }
-  td.reactors { white-space:nowrap; }
+  td.reactors { white-space:nowrap; text-align:center; }
   .reactor-count { color:var(--text); font-variant-numeric:tabular-nums; cursor:help; border-bottom:1px dotted var(--muted); }
 
   /* Tags / badges */
@@ -85,8 +91,8 @@
   .tag-unknown { color:var(--muted); font-weight:500; padding:0; background:none; }
 
   /* Execs column — three lines stacked */
-  td.execs { min-width:240px; line-height:1.5; }
-  .exec { display:block; font-size:13px; white-space:nowrap; }
+  td.execs { line-height:1.5; }
+  .exec { display:block; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .exec .role {
     display:inline-block; width:32px; color:var(--muted);
     font-size:11px; font-weight:600;
@@ -100,7 +106,8 @@
   .lilink:hover { background:#0958a8; text-decoration:none; }
 
   /* CSAT column */
-  td.csat { max-width:340px; font-size:13px; }
+  td.csat { font-size:13px; word-wrap:break-word; line-height:1.45; }
+  td.deploy { word-wrap:break-word; }
 
   /* Source link chips */
   .srcchip {
@@ -158,6 +165,15 @@
   </div>
 
   <table id="tbl">
+    <colgroup>
+      <col class="c-op">
+      <col class="c-ctry">
+      <col class="c-reactors">
+      <col class="c-deploy">
+      <col class="c-signed">
+      <col class="c-execs">
+      <col class="c-csat">
+    </colgroup>
     <thead>
       <tr>
         <th data-col="0">Operator</th>
@@ -180,7 +196,7 @@
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://www.investor.nexteraenergy.com" target="_blank" rel="noopener" title="NextEra Energy investor relations">[1]</a><a class="srcchip" href="https://www.investor.nexteraenergy.com/~/media/Files/N/NEE-IR/reports-and-fillings/quarterly-earnings/2026/Q1%202026/Q1%202026%20Earnings%20Script%20vF.pdf" target="_blank" rel="noopener" title="Q1 2026 earnings call transcript">[2]</a></td>
       <td class="signed"><span class="muted">—</span></td>
       <td class="execs"><span class="exec"><span class="role">CIO</span><span class="muted">—</span></span><span class="exec"><span class="role">CTO</span><span class="muted">—</span></span><span class="exec"><span class="role">CFO</span>Michael H. Dunne</span></td>
-      <td class="csat"><span title="ReliabilityOne® National Reliability Award (8 of the last 11 years); no current J.D. Power/ACSI numeric score found">ReliabilityOne® National Reliability Award (8 of the last 11 years); no current J.D. Po…</span> <a class="srcchip" href="https://investingnews.com/nrc-authorizes-fpl-s-st-lucie-nuclear-plant-to-operate-for-another-20-years/" target="_blank" rel="noopener" title="Investing News Network summary of FPL St. Lucie renewal">[1]</a><a class="srcchip" href="https://www.investor.nexteraenergy.com/~/media/Files/N/NEE-IR/reports-and-fillings/quarterly-earnings/2026/Q1%202026/2026-0423%20NEEQ12026News%20Release%20vF.pdf" target="_blank" rel="noopener" title="NextEra Energy Q1 2026 release">[2]</a></td>
+      <td class="csat"><span title="ReliabilityOne® National Reliability Award (8 of the last 11 years); no current J.D. Power/ACSI numeric score found">ReliabilityOne® National Reliability Award (8 of the last 11 years); no current J.D. Power/ACSI numeric score found</span> <a class="srcchip" href="https://investingnews.com/nrc-authorizes-fpl-s-st-lucie-nuclear-plant-to-operate-for-another-20-years/" target="_blank" rel="noopener" title="Investing News Network summary of FPL St. Lucie renewal">[1]</a><a class="srcchip" href="https://www.investor.nexteraenergy.com/~/media/Files/N/NEE-IR/reports-and-fillings/quarterly-earnings/2026/Q1%202026/2026-0423%20NEEQ12026News%20Release%20vF.pdf" target="_blank" rel="noopener" title="NextEra Energy Q1 2026 release">[2]</a></td>
     </tr>
     <tr>
       <td class="op">
@@ -240,7 +256,7 @@
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://ir.dteenergy.com/news/press-release-details/2026/DTE-Energy-reports-first-quarter-2026-accomplishments-investments-and-financial-results/default.aspx" target="_blank" rel="noopener" title="DTE Energy IR">[1]</a></td>
       <td class="signed"><span class="muted">—</span></td>
       <td class="execs"><span class="exec"><span class="role">CIO</span><span class="muted">—</span></span><span class="exec"><span class="role">CTO</span><span class="muted">—</span></span><span class="exec"><span class="role">CFO</span>David Ruud</span></td>
-      <td class="csat"><span title="ACSI lists DTE Energy in Electric Investor-Owned Utilities, but I could not verify a current public numeric score from the source page in time.">ACSI lists DTE Energy in Electric Investor-Owned Utilities, but I could not verify a cu…</span> <a class="srcchip" href="https://theacsi.org/companies/" target="_blank" rel="noopener" title="ACSI Companies Archive">[1]</a></td>
+      <td class="csat"><span title="ACSI lists DTE Energy in Electric Investor-Owned Utilities, but I could not verify a current public numeric score from the source page in time.">ACSI lists DTE Energy in Electric Investor-Owned Utilities, but I could not verify a current public numeric score from the source page in time.</span> <a class="srcchip" href="https://theacsi.org/companies/" target="_blank" rel="noopener" title="ACSI Companies Archive">[1]</a></td>
     </tr>
     <tr>
       <td class="op">
@@ -372,7 +388,7 @@
       <td class="deploy"><span class="tag tag-unknown">Unknown</span> <a class="srcchip" href="https://austinenergy.com/about/company-profile/executive-leadership-team" target="_blank" rel="noopener" title="Austin Energy Executive Leadership Team">[1]</a><a class="srcchip" href="https://austinenergy.com/about/company-profile/electric-system/power-plants" target="_blank" rel="noopener" title="Austin Energy Power Plants">[2]</a></td>
       <td class="signed"><span class="muted">—</span></td>
       <td class="execs"><span class="exec"><span class="role">CIO</span>Elaine Veselka (Vice President, Technology and Data; CIO-equivalent) <a class="lilink" href="https://www.linkedin.com/in/elaine-veselka-0b7a1b19" target="_blank" rel="noopener" title="LinkedIn">in</a></span><span class="exec"><span class="role">CTO</span>David Tomczyszyn (Vice President, Electric System Engineering &amp; Technical Services; CTO-equivalent) <a class="lilink" href="https://www.linkedin.com/in/david-tomczyszyn-0a3a6a45" target="_blank" rel="noopener" title="LinkedIn">in</a></span><span class="exec"><span class="role">CFO</span>John Davis (Interim Senior Vice President and Chief Financial Officer) <a class="lilink" href="https://www.linkedin.com/in/johnandrewdavis" target="_blank" rel="noopener" title="LinkedIn">in</a></span></td>
-      <td class="csat"><span title="No public satisfaction score found; Austin Energy instead publishes reliability metrics (0.98 annual interruptions/customer vs 1.40 statewide average; 74.30 min interruption length vs 153.40 statewide average)">No public satisfaction score found; Austin Energy instead publishes reliability metrics…</span> <a class="srcchip" href="https://austinenergy.com/about/company-profile/benefits-of-public-power" target="_blank" rel="noopener" title="Austin Energy Public Power Works for You">[1]</a></td>
+      <td class="csat"><span title="No public satisfaction score found; Austin Energy instead publishes reliability metrics (0.98 annual interruptions/customer vs 1.40 statewide average; 74.30 min interruption length vs 153.40 statewide average)">No public satisfaction score found; Austin Energy instead publishes reliability metrics (0.98 annual interruptions/customer vs 1.40 statewide average; 74.30 min interruption len…</span> <a class="srcchip" href="https://austinenergy.com/about/company-profile/benefits-of-public-power" target="_blank" rel="noopener" title="Austin Energy Public Power Works for You">[1]</a></td>
     </tr>
     <tr>
       <td class="op">
